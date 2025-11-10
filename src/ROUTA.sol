@@ -7,7 +7,7 @@ contract ROUTA is ERC20Permit, IROUTA {
     constructor(
         address to,
         uint256 amount
-    ) ERC20Permit("Routa Ev") ERC20("Routa EV", "ROUTA") {
+    ) ERC20Permit("Routa EV") ERC20("Routa EV", "ROUTA") {
         _mint(to, amount);
     }
 
