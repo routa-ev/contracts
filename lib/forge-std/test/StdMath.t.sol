@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.0 <0.9.0;
 
-import {stdMath} from "../src/StdMath.sol";
-import {Test, stdError} from "../src/Test.sol";
+import {stdMath} from '../src/StdMath.sol';
+import {Test, stdError} from '../src/Test.sol';
 
 contract StdMathMock is Test {
     function exposed_percentDelta(uint256 a, uint256 b) public pure returns (uint256) {
@@ -125,7 +125,7 @@ contract StdMathTest is Test {
         assertEq(stdMath.percentDelta(5000, uint256(2500)), 1e18);
         assertEq(stdMath.percentDelta(7500, uint256(2500)), 2e18);
 
-        vm.expectRevert("stdMath percentDelta(uint256,uint256): Divisor is zero");
+        vm.expectRevert('stdMath percentDelta(uint256,uint256): Divisor is zero');
         stdMathMock.exposed_percentDelta(uint256(1), 0);
     }
 
@@ -133,7 +133,7 @@ contract StdMathTest is Test {
         vm.assume(b != 0);
         uint256 manualDelta = a > b ? a - b : b - a;
 
-        uint256 manualPercentDelta = manualDelta * 1e18 / b;
+        uint256 manualPercentDelta = (manualDelta * 1e18) / b;
         uint256 percentDelta = stdMath.percentDelta(a, b);
 
         assertEq(percentDelta, manualPercentDelta);
@@ -163,7 +163,7 @@ contract StdMathTest is Test {
         assertEq(stdMath.percentDelta(5000, int256(2500)), 1e18);
         assertEq(stdMath.percentDelta(7500, int256(2500)), 2e18);
 
-        vm.expectRevert("stdMath percentDelta(int256,int256): Divisor is zero");
+        vm.expectRevert('stdMath percentDelta(int256,int256): Divisor is zero');
         stdMathMock.exposed_percentDelta(int256(1), 0);
     }
 
@@ -182,7 +182,7 @@ contract StdMathTest is Test {
             manualDelta = absA + absB;
         }
 
-        uint256 manualPercentDelta = manualDelta * 1e18 / absB;
+        uint256 manualPercentDelta = (manualDelta * 1e18) / absB;
         uint256 percentDelta = stdMath.percentDelta(a, b);
 
         assertEq(percentDelta, manualPercentDelta);

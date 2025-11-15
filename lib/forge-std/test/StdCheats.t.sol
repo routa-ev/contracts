@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.7.0 <0.9.0;
 
-import {StdCheats} from "../src/StdCheats.sol";
-import {Test} from "../src/Test.sol";
-import {stdJson} from "../src/StdJson.sol";
-import {stdToml} from "../src/StdToml.sol";
-import {IERC20} from "../src/interfaces/IERC20.sol";
+import {StdCheats} from '../src/StdCheats.sol';
+import {Test} from '../src/Test.sol';
+import {stdJson} from '../src/StdJson.sol';
+import {stdToml} from '../src/StdToml.sol';
+import {IERC20} from '../src/interfaces/IERC20.sol';
 
 contract StdCheatsTest is Test {
     Bar test;
@@ -80,20 +80,20 @@ contract StdCheatsTest is Test {
     }
 
     function test_MakeAccountEquivalence() public {
-        Account memory account = makeAccount("1337");
-        (address addr, uint256 key) = makeAddrAndKey("1337");
+        Account memory account = makeAccount('1337');
+        (address addr, uint256 key) = makeAddrAndKey('1337');
         assertEq(account.addr, addr);
         assertEq(account.key, key);
     }
 
     function test_MakeAddrEquivalence() public {
-        (address addr,) = makeAddrAndKey("1337");
-        assertEq(makeAddr("1337"), addr);
+        (address addr, ) = makeAddrAndKey('1337');
+        assertEq(makeAddr('1337'), addr);
     }
 
     function test_MakeAddrSigning() public {
-        (address addr, uint256 key) = makeAddrAndKey("1337");
-        bytes32 hash = keccak256("some_message");
+        (address addr, uint256 key) = makeAddrAndKey('1337');
+        bytes32 hash = keccak256('some_message');
 
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(key, hash);
         assertEq(ecrecover(hash, v, r, s), addr);
@@ -152,7 +152,7 @@ contract StdCheatsTest is Test {
     }
 
     function test_DeployCode() public {
-        address deployed = deployCode("StdCheats.t.sol:Bar", bytes(""));
+        address deployed = deployCode('StdCheats.t.sol:Bar', bytes(''));
         assertEq(string(getCode(deployed)), string(getCode(address(test))));
     }
 
@@ -184,18 +184,18 @@ contract StdCheatsTest is Test {
     }
 
     function test_DeployCodeNoArgs() public {
-        address deployed = deployCode("StdCheats.t.sol:Bar");
+        address deployed = deployCode('StdCheats.t.sol:Bar');
         assertEq(string(getCode(deployed)), string(getCode(address(test))));
     }
 
     function test_DeployCodeVal() public {
-        address deployed = deployCode("StdCheats.t.sol:Bar", bytes(""), 1 ether);
+        address deployed = deployCode('StdCheats.t.sol:Bar', bytes(''), 1 ether);
         assertEq(string(getCode(deployed)), string(getCode(address(test))));
         assertEq(deployed.balance, 1 ether);
     }
 
     function test_DeployCodeValNoArgs() public {
-        address deployed = deployCode("StdCheats.t.sol:Bar", 1 ether);
+        address deployed = deployCode('StdCheats.t.sol:Bar', 1 ether);
         assertEq(string(getCode(deployed)), string(getCode(address(test))));
         assertEq(deployed.balance, 1 ether);
     }
@@ -206,8 +206,8 @@ contract StdCheatsTest is Test {
     }
 
     function test_RevertIf_DeployCodeFail() public {
-        vm.expectRevert(bytes("StdCheats deployCode(string): Deployment failed."));
-        this.deployCodeHelper("StdCheats.t.sol:RevertingContract");
+        vm.expectRevert(bytes('StdCheats deployCode(string): Deployment failed.'));
+        this.deployCodeHelper('StdCheats.t.sol:RevertingContract');
     }
 
     function getCode(address who) internal view returns (bytes memory o_code) {
@@ -228,7 +228,7 @@ contract StdCheatsTest is Test {
     }
 
     function test_DeriveRememberKey() public {
-        string memory mnemonic = "test test test test test test test test test test test junk";
+        string memory mnemonic = 'test test test test test test test test test test test junk';
 
         (address deployer, uint256 privateKey) = deriveRememberKey(mnemonic, 0);
         assertEq(deployer, 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266);
@@ -236,24 +236,24 @@ contract StdCheatsTest is Test {
     }
 
     function test_BytesToUint() public pure {
-        assertEq(3, bytesToUint_test(hex"03"));
-        assertEq(2, bytesToUint_test(hex"02"));
-        assertEq(255, bytesToUint_test(hex"ff"));
-        assertEq(29625, bytesToUint_test(hex"73b9"));
+        assertEq(3, bytesToUint_test(hex'03'));
+        assertEq(2, bytesToUint_test(hex'02'));
+        assertEq(255, bytesToUint_test(hex'ff'));
+        assertEq(29625, bytesToUint_test(hex'73b9'));
     }
 
     function test_ParseJsonTxDetail() public view {
         string memory root = vm.projectRoot();
-        string memory path = string.concat(root, "/test/fixtures/broadcast.log.json");
+        string memory path = string.concat(root, '/test/fixtures/broadcast.log.json');
         string memory json = vm.readFile(path);
-        bytes memory transactionDetails = json.parseRaw(".transactions[0].tx");
+        bytes memory transactionDetails = json.parseRaw('.transactions[0].tx');
         RawTx1559Detail memory rawTxDetail = abi.decode(transactionDetails, (RawTx1559Detail));
         Tx1559Detail memory txDetail = rawToConvertedEIP1559Detail(rawTxDetail);
         assertEq(txDetail.from, 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266);
         assertEq(txDetail.to, 0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512);
         assertEq(
             txDetail.data,
-            hex"23e99187000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000013370000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000030000000000000000000000000000000000000000000000000000000000000004"
+            hex'23e99187000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000013370000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000030000000000000000000000000000000000000000000000000000000000000004'
         );
         assertEq(txDetail.nonce, 3);
         assertEq(txDetail.txType, 2);
@@ -263,7 +263,7 @@ contract StdCheatsTest is Test {
 
     function test_ReadEIP1559Transaction() public view {
         string memory root = vm.projectRoot();
-        string memory path = string.concat(root, "/test/fixtures/broadcast.log.json");
+        string memory path = string.concat(root, '/test/fixtures/broadcast.log.json');
         uint256 index = 0;
         Tx1559 memory transaction = readTx1559(path, index);
         transaction;
@@ -271,25 +271,25 @@ contract StdCheatsTest is Test {
 
     function test_ReadEIP1559Transactions() public view {
         string memory root = vm.projectRoot();
-        string memory path = string.concat(root, "/test/fixtures/broadcast.log.json");
+        string memory path = string.concat(root, '/test/fixtures/broadcast.log.json');
         Tx1559[] memory transactions = readTx1559s(path);
         transactions;
     }
 
     function test_ReadReceipt() public view {
         string memory root = vm.projectRoot();
-        string memory path = string.concat(root, "/test/fixtures/broadcast.log.json");
+        string memory path = string.concat(root, '/test/fixtures/broadcast.log.json');
         uint256 index = 5;
         Receipt memory receipt = readReceipt(path, index);
         assertEq(
             receipt.logsBloom,
-            hex"00000000000800000000000000000010000000000000000000000000000180000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100"
+            hex'00000000000800000000000000000010000000000000000000000000000180000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100'
         );
     }
 
     function test_ReadReceipts() public view {
         string memory root = vm.projectRoot();
-        string memory path = string.concat(root, "/test/fixtures/broadcast.log.json");
+        string memory path = string.concat(root, '/test/fixtures/broadcast.log.json');
         Receipt[] memory receipts = readReceipts(path);
         receipts;
     }
@@ -400,35 +400,37 @@ contract StdCheatsTest is Test {
     }
 
     function testFuzz_AssumeNotPrecompile(address addr) external {
-        assumeNotPrecompile(addr, getChain("optimism_sepolia").chainId);
+        assumeNotPrecompile(addr, getChain('optimism_sepolia').chainId);
         assertTrue(
-            addr < address(1) || (addr > address(9) && addr < address(0x4200000000000000000000000000000000000000))
-                || addr > address(0x4200000000000000000000000000000000000800)
+            addr < address(1) ||
+                (addr > address(9) && addr < address(0x4200000000000000000000000000000000000000)) ||
+                addr > address(0x4200000000000000000000000000000000000800)
         );
     }
 
     function testFuzz_AssumeNotForgeAddress(address addr) external pure {
         assumeNotForgeAddress(addr);
         assertTrue(
-            addr != address(vm) && addr != 0x000000000000000000636F6e736F6c652e6c6f67
-                && addr != 0x4e59b44847b379578588920cA78FbF26c0B4956C
+            addr != address(vm) &&
+                addr != 0x000000000000000000636F6e736F6c652e6c6f67 &&
+                addr != 0x4e59b44847b379578588920cA78FbF26c0B4956C
         );
     }
 
     function test_RevertIf_CannotDeployCodeTo() external {
-        vm.expectRevert("StdCheats deployCodeTo(string,bytes,uint256,address): Failed to create runtime bytecode.");
+        vm.expectRevert('StdCheats deployCodeTo(string,bytes,uint256,address): Failed to create runtime bytecode.');
         this._revertDeployCodeTo();
     }
 
     function _revertDeployCodeTo() external {
-        deployCodeTo("StdCheats.t.sol:RevertingContract", address(0));
+        deployCodeTo('StdCheats.t.sol:RevertingContract', address(0));
     }
 
     function test_DeployCodeTo() external {
-        address arbitraryAddress = makeAddr("arbitraryAddress");
+        address arbitraryAddress = makeAddr('arbitraryAddress');
 
         deployCodeTo(
-            "StdCheats.t.sol:MockContractWithConstructorArgs",
+            'StdCheats.t.sol:MockContractWithConstructorArgs',
             abi.encode(uint256(6), true, bytes20(arbitraryAddress)),
             1 ether,
             arbitraryAddress
@@ -477,7 +479,7 @@ contract StdCheatsForkTest is Test {
         // We deploy a mock version so we can properly test the revert.
         StdCheatsMock stdCheatsMock = new StdCheatsMock();
         address eoa = vm.addr({privateKey: 1});
-        vm.expectRevert("StdCheats assumeNotBlacklisted(address,address): Token address is not a contract.");
+        vm.expectRevert('StdCheats assumeNotBlacklisted(address,address): Token address is not a contract.');
         stdCheatsMock.exposed_assumeNotBlacklisted(eoa, address(0));
     }
 
@@ -555,17 +557,17 @@ contract Bar {
 
     /// `HOAX` and `CHANGEPRANK` STDCHEATS
     function bar(address expectedSender) public payable {
-        require(msg.sender == expectedSender, "!prank");
+        require(msg.sender == expectedSender, '!prank');
     }
 
     function origin(address expectedSender) public payable {
-        require(msg.sender == expectedSender, "!prank");
-        require(tx.origin == expectedSender, "!prank");
+        require(msg.sender == expectedSender, '!prank');
+        require(tx.origin == expectedSender, '!prank');
     }
 
     function origin(address expectedSender, address expectedOrigin) public payable {
-        require(msg.sender == expectedSender, "!prank");
-        require(tx.origin == expectedOrigin, "!prank");
+        require(msg.sender == expectedSender, '!prank');
+        require(tx.origin == expectedOrigin, '!prank');
     }
 
     /// `DEAL` STDCHEAT

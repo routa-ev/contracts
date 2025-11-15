@@ -1,1 +1,50 @@
-{"abi":[],"bytecode":{"object":"0x6080604052348015600f57600080fd5b50603f80601d6000396000f3fe6080604052600080fdfea264697066735822122022c4a6e7008f44288830c785f31f35cb991c9e56aa192bed8bcda6f80e11a47364736f6c634300081c0033","sourceMap":"25:17:22:-:0;;;;;;;;;;;;;;;;;;;","linkReferences":{}},"deployedBytecode":{"object":"0x6080604052600080fdfea264697066735822122022c4a6e7008f44288830c785f31f35cb991c9e56aa192bed8bcda6f80e11a47364736f6c634300081c0033","sourceMap":"25:17:22:-:0;;;;;","linkReferences":{}},"methodIdentifiers":{},"rawMetadata":"{\"compiler\":{\"version\":\"0.8.28+commit.7893614a\"},\"language\":\"Solidity\",\"output\":{\"abi\":[],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"src/ROUTA.sol\":\"ROUTA\"},\"evmVersion\":\"paris\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[\":@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/\",\":erc4626-tests/=lib/openzeppelin-contracts/lib/erc4626-tests/\",\":forge-std/=lib/forge-std/src/\",\":halmos-cheatcodes/=lib/openzeppelin-contracts/lib/halmos-cheatcodes/src/\",\":openzeppelin-contracts/=lib/openzeppelin-contracts/\"]},\"sources\":{\"src/ROUTA.sol\":{\"keccak256\":\"0x42d504fcfe74d9616ceaebf1c8c24045d4d2a241944a85e0c80f91a79af3da0d\",\"urls\":[\"bzz-raw://efa76ad956ead45110749d02a83bd57e5593a157fedc546ee346fe4c30d06286\",\"dweb:/ipfs/QmfGSJ5yRRunadgvf21oDEz47otM8dd85oc2SZQ5grkhZG\"]}},\"version\":1}","metadata":{"compiler":{"version":"0.8.28+commit.7893614a"},"language":"Solidity","output":{"abi":[],"devdoc":{"kind":"dev","methods":{},"version":1},"userdoc":{"kind":"user","methods":{},"version":1}},"settings":{"remappings":["@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/","erc4626-tests/=lib/openzeppelin-contracts/lib/erc4626-tests/","forge-std/=lib/forge-std/src/","halmos-cheatcodes/=lib/openzeppelin-contracts/lib/halmos-cheatcodes/src/","openzeppelin-contracts/=lib/openzeppelin-contracts/"],"optimizer":{"enabled":true,"runs":200},"metadata":{"bytecodeHash":"ipfs"},"compilationTarget":{"src/ROUTA.sol":"ROUTA"},"evmVersion":"paris","libraries":{}},"sources":{"src/ROUTA.sol":{"keccak256":"0x42d504fcfe74d9616ceaebf1c8c24045d4d2a241944a85e0c80f91a79af3da0d","urls":["bzz-raw://efa76ad956ead45110749d02a83bd57e5593a157fedc546ee346fe4c30d06286","dweb:/ipfs/QmfGSJ5yRRunadgvf21oDEz47otM8dd85oc2SZQ5grkhZG"],"license":null}},"version":1},"id":22}
+{
+  "abi": [],
+  "bytecode": {
+    "object": "0x6080604052348015600f57600080fd5b50603f80601d6000396000f3fe6080604052600080fdfea264697066735822122022c4a6e7008f44288830c785f31f35cb991c9e56aa192bed8bcda6f80e11a47364736f6c634300081c0033",
+    "sourceMap": "25:17:22:-:0;;;;;;;;;;;;;;;;;;;",
+    "linkReferences": {}
+  },
+  "deployedBytecode": {
+    "object": "0x6080604052600080fdfea264697066735822122022c4a6e7008f44288830c785f31f35cb991c9e56aa192bed8bcda6f80e11a47364736f6c634300081c0033",
+    "sourceMap": "25:17:22:-:0;;;;;",
+    "linkReferences": {}
+  },
+  "methodIdentifiers": {},
+  "rawMetadata": "{\"compiler\":{\"version\":\"0.8.28+commit.7893614a\"},\"language\":\"Solidity\",\"output\":{\"abi\":[],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"src/ROUTA.sol\":\"ROUTA\"},\"evmVersion\":\"paris\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[\":@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/\",\":erc4626-tests/=lib/openzeppelin-contracts/lib/erc4626-tests/\",\":forge-std/=lib/forge-std/src/\",\":halmos-cheatcodes/=lib/openzeppelin-contracts/lib/halmos-cheatcodes/src/\",\":openzeppelin-contracts/=lib/openzeppelin-contracts/\"]},\"sources\":{\"src/ROUTA.sol\":{\"keccak256\":\"0x42d504fcfe74d9616ceaebf1c8c24045d4d2a241944a85e0c80f91a79af3da0d\",\"urls\":[\"bzz-raw://efa76ad956ead45110749d02a83bd57e5593a157fedc546ee346fe4c30d06286\",\"dweb:/ipfs/QmfGSJ5yRRunadgvf21oDEz47otM8dd85oc2SZQ5grkhZG\"]}},\"version\":1}",
+  "metadata": {
+    "compiler": { "version": "0.8.28+commit.7893614a" },
+    "language": "Solidity",
+    "output": {
+      "abi": [],
+      "devdoc": { "kind": "dev", "methods": {}, "version": 1 },
+      "userdoc": { "kind": "user", "methods": {}, "version": 1 }
+    },
+    "settings": {
+      "remappings": [
+        "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+        "erc4626-tests/=lib/openzeppelin-contracts/lib/erc4626-tests/",
+        "forge-std/=lib/forge-std/src/",
+        "halmos-cheatcodes/=lib/openzeppelin-contracts/lib/halmos-cheatcodes/src/",
+        "openzeppelin-contracts/=lib/openzeppelin-contracts/"
+      ],
+      "optimizer": { "enabled": true, "runs": 200 },
+      "metadata": { "bytecodeHash": "ipfs" },
+      "compilationTarget": { "src/ROUTA.sol": "ROUTA" },
+      "evmVersion": "paris",
+      "libraries": {}
+    },
+    "sources": {
+      "src/ROUTA.sol": {
+        "keccak256": "0x42d504fcfe74d9616ceaebf1c8c24045d4d2a241944a85e0c80f91a79af3da0d",
+        "urls": [
+          "bzz-raw://efa76ad956ead45110749d02a83bd57e5593a157fedc546ee346fe4c30d06286",
+          "dweb:/ipfs/QmfGSJ5yRRunadgvf21oDEz47otM8dd85oc2SZQ5grkhZG"
+        ],
+        "license": null
+      }
+    },
+    "version": 1
+  },
+  "id": 22
+}

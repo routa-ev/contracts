@@ -77,32 +77,32 @@ library LibVariable {
         if (!self.isArray || self.kind == TypeKind.None) {
             return tyStr;
         } else {
-            return string.concat(tyStr, "[]");
+            return string.concat(tyStr, '[]');
         }
     }
 
     /// @dev Converts a `TypeKind` enum to its base string representation.
     function toString(TypeKind self) internal pure returns (string memory) {
-        if (self == TypeKind.Bool) return "bool";
-        if (self == TypeKind.Address) return "address";
-        if (self == TypeKind.Bytes32) return "bytes32";
-        if (self == TypeKind.Uint256) return "uint256";
-        if (self == TypeKind.Int256) return "int256";
-        if (self == TypeKind.String) return "string";
-        if (self == TypeKind.Bytes) return "bytes";
-        return "none";
+        if (self == TypeKind.Bool) return 'bool';
+        if (self == TypeKind.Address) return 'address';
+        if (self == TypeKind.Bytes32) return 'bytes32';
+        if (self == TypeKind.Uint256) return 'uint256';
+        if (self == TypeKind.Int256) return 'int256';
+        if (self == TypeKind.String) return 'string';
+        if (self == TypeKind.Bytes) return 'bytes';
+        return 'none';
     }
 
     /// @dev Converts a `TypeKind` enum to its base string representation.
     function toTomlKey(TypeKind self) internal pure returns (string memory) {
-        if (self == TypeKind.Bool) return "bool";
-        if (self == TypeKind.Address) return "address";
-        if (self == TypeKind.Bytes32) return "bytes32";
-        if (self == TypeKind.Uint256) return "uint";
-        if (self == TypeKind.Int256) return "int";
-        if (self == TypeKind.String) return "string";
-        if (self == TypeKind.Bytes) return "bytes";
-        return "none";
+        if (self == TypeKind.Bool) return 'bool';
+        if (self == TypeKind.Address) return 'address';
+        if (self == TypeKind.Bytes32) return 'bytes32';
+        if (self == TypeKind.Uint256) return 'uint';
+        if (self == TypeKind.Int256) return 'int';
+        if (self == TypeKind.String) return 'string';
+        if (self == TypeKind.Bytes) return 'bytes';
+        return 'none';
     }
 
     // -- VARIABLE HELPERS ----------------------------------------------------
@@ -129,32 +129,23 @@ library LibVariable {
     }
 
     /// @notice Coerces a `Variable` to an `address` value.
-    function toAddress(Variable memory self)
-        internal
-        pure
-        check(self, Type(TypeKind.Address, false))
-        returns (address)
-    {
+    function toAddress(
+        Variable memory self
+    ) internal pure check(self, Type(TypeKind.Address, false)) returns (address) {
         return abi.decode(self.data, (address));
     }
 
     /// @notice Coerces a `Variable` to a `bytes32` value.
-    function toBytes32(Variable memory self)
-        internal
-        pure
-        check(self, Type(TypeKind.Bytes32, false))
-        returns (bytes32)
-    {
+    function toBytes32(
+        Variable memory self
+    ) internal pure check(self, Type(TypeKind.Bytes32, false)) returns (bytes32) {
         return abi.decode(self.data, (bytes32));
     }
 
     /// @notice Coerces a `Variable` to a `uint256` value.
-    function toUint256(Variable memory self)
-        internal
-        pure
-        check(self, Type(TypeKind.Uint256, false))
-        returns (uint256)
-    {
+    function toUint256(
+        Variable memory self
+    ) internal pure check(self, Type(TypeKind.Uint256, false)) returns (uint256) {
         return abi.decode(self.data, (uint256));
     }
 
@@ -254,64 +245,46 @@ library LibVariable {
     }
 
     /// @notice Coerces a `Variable` to a `string` value.
-    function toString(Variable memory self)
-        internal
-        pure
-        check(self, Type(TypeKind.String, false))
-        returns (string memory)
-    {
+    function toString(
+        Variable memory self
+    ) internal pure check(self, Type(TypeKind.String, false)) returns (string memory) {
         return abi.decode(self.data, (string));
     }
 
     /// @notice Coerces a `Variable` to a `bytes` value.
-    function toBytes(Variable memory self)
-        internal
-        pure
-        check(self, Type(TypeKind.Bytes, false))
-        returns (bytes memory)
-    {
+    function toBytes(
+        Variable memory self
+    ) internal pure check(self, Type(TypeKind.Bytes, false)) returns (bytes memory) {
         return abi.decode(self.data, (bytes));
     }
 
     // -- VARIABLE COERCION FUNCTIONS (ARRAYS) ---------------------------------
 
     /// @notice Coerces a `Variable` to a `bool` array.
-    function toBoolArray(Variable memory self)
-        internal
-        pure
-        check(self, Type(TypeKind.Bool, true))
-        returns (bool[] memory)
-    {
+    function toBoolArray(
+        Variable memory self
+    ) internal pure check(self, Type(TypeKind.Bool, true)) returns (bool[] memory) {
         return abi.decode(self.data, (bool[]));
     }
 
     /// @notice Coerces a `Variable` to an `address` array.
-    function toAddressArray(Variable memory self)
-        internal
-        pure
-        check(self, Type(TypeKind.Address, true))
-        returns (address[] memory)
-    {
+    function toAddressArray(
+        Variable memory self
+    ) internal pure check(self, Type(TypeKind.Address, true)) returns (address[] memory) {
         return abi.decode(self.data, (address[]));
     }
 
     /// @notice Coerces a `Variable` to a `bytes32` array.
-    function toBytes32Array(Variable memory self)
-        internal
-        pure
-        check(self, Type(TypeKind.Bytes32, true))
-        returns (bytes32[] memory)
-    {
+    function toBytes32Array(
+        Variable memory self
+    ) internal pure check(self, Type(TypeKind.Bytes32, true)) returns (bytes32[] memory) {
         return abi.decode(self.data, (bytes32[]));
     }
 
     /// @notice Coerces a `Variable` to a `uint256` array.
-    function toUint256Array(Variable memory self)
-        internal
-        pure
-        check(self, Type(TypeKind.Uint256, true))
-        returns (uint256[] memory)
-    {
+    function toUint256Array(
+        Variable memory self
+    ) internal pure check(self, Type(TypeKind.Uint256, true)) returns (uint256[] memory) {
         return abi.decode(self.data, (uint256[]));
     }
 
@@ -381,12 +354,9 @@ library LibVariable {
     }
 
     /// @notice Coerces a `Variable` to an `int256` array.
-    function toInt256Array(Variable memory self)
-        internal
-        pure
-        check(self, Type(TypeKind.Int256, true))
-        returns (int256[] memory)
-    {
+    function toInt256Array(
+        Variable memory self
+    ) internal pure check(self, Type(TypeKind.Int256, true)) returns (int256[] memory) {
         return abi.decode(self.data, (int256[]));
     }
 
@@ -456,22 +426,16 @@ library LibVariable {
     }
 
     /// @notice Coerces a `Variable` to a `string` array.
-    function toStringArray(Variable memory self)
-        internal
-        pure
-        check(self, Type(TypeKind.String, true))
-        returns (string[] memory)
-    {
+    function toStringArray(
+        Variable memory self
+    ) internal pure check(self, Type(TypeKind.String, true)) returns (string[] memory) {
         return abi.decode(self.data, (string[]));
     }
 
     /// @notice Coerces a `Variable` to a `bytes` array.
-    function toBytesArray(Variable memory self)
-        internal
-        pure
-        check(self, Type(TypeKind.Bytes, true))
-        returns (bytes[] memory)
-    {
+    function toBytesArray(
+        Variable memory self
+    ) internal pure check(self, Type(TypeKind.Bytes, true)) returns (bytes[] memory) {
         return abi.decode(self.data, (bytes[]));
     }
 }

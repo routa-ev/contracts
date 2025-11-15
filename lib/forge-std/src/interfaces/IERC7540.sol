@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.6.2;
 
-import {IERC7575} from "./IERC7575.sol";
+import {IERC7575} from './IERC7575.sol';
 
 /// @dev Interface of the base operator logic of ERC7540, as defined in
 /// https://eips.ethereum.org/EIPS/eip-7540
@@ -38,7 +38,11 @@ interface IERC7540Operator {
 /// https://eips.ethereum.org/EIPS/eip-7540
 interface IERC7540Deposit is IERC7540Operator {
     event DepositRequest(
-        address indexed controller, address indexed owner, uint256 indexed requestId, address sender, uint256 assets
+        address indexed controller,
+        address indexed owner,
+        uint256 indexed requestId,
+        address sender,
+        uint256 assets
     );
     /**
      * @dev Transfers assets from sender into the Vault and submits a Request for asynchronous deposit.
@@ -73,10 +77,10 @@ interface IERC7540Deposit is IERC7540Operator {
      * - MUST NOT show any variations depending on the caller.
      * - MUST NOT revert unless due to integer overflow caused by an unreasonably large input.
      */
-    function claimableDepositRequest(uint256 requestId, address controller)
-        external
-        view
-        returns (uint256 claimableAssets);
+    function claimableDepositRequest(
+        uint256 requestId,
+        address controller
+    ) external view returns (uint256 claimableAssets);
 
     /**
      * @dev Mints shares Vault shares to receiver by claiming the Request of the controller.
@@ -99,7 +103,11 @@ interface IERC7540Deposit is IERC7540Operator {
 /// https://eips.ethereum.org/EIPS/eip-7540
 interface IERC7540Redeem is IERC7540Operator {
     event RedeemRequest(
-        address indexed controller, address indexed owner, uint256 indexed requestId, address sender, uint256 assets
+        address indexed controller,
+        address indexed owner,
+        uint256 indexed requestId,
+        address sender,
+        uint256 assets
     );
 
     /**
@@ -133,10 +141,10 @@ interface IERC7540Redeem is IERC7540Operator {
      * - MUST NOT show any variations depending on the caller.
      * - MUST NOT revert unless due to integer overflow caused by an unreasonably large input.
      */
-    function claimableRedeemRequest(uint256 requestId, address controller)
-        external
-        view
-        returns (uint256 claimableShares);
+    function claimableRedeemRequest(
+        uint256 requestId,
+        address controller
+    ) external view returns (uint256 claimableShares);
 }
 
 /// @dev Interface of the fully asynchronous Vault interface of ERC7540, as defined in

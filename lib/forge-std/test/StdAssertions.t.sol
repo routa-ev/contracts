@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.7.0 <0.9.0;
 
-import {StdAssertions} from "../src/StdAssertions.sol";
-import {Vm} from "../src/Vm.sol";
+import {StdAssertions} from '../src/StdAssertions.sol';
+import {Vm} from '../src/Vm.sol';
 
 interface VmInternal is Vm {
     function _expectCheatcodeRevert(bytes memory message) external;
 }
 
 contract StdAssertionsTest is StdAssertions {
-    string constant errorMessage = "User provided message";
+    string constant errorMessage = 'User provided message';
     uint256 constant maxDecimals = 77;
 
     bool constant SHOULD_REVERT = true;
@@ -18,7 +18,7 @@ contract StdAssertionsTest is StdAssertions {
     bool constant STRICT_REVERT_DATA = true;
     bool constant NON_STRICT_REVERT_DATA = false;
 
-    VmInternal constant vm = VmInternal(address(uint160(uint256(keccak256("hevm cheat code")))));
+    VmInternal constant vm = VmInternal(address(uint160(uint256(keccak256('hevm cheat code')))));
 
     function testFuzz_AssertEqCall_Return_Pass(
         bytes memory callDataA,
@@ -47,7 +47,10 @@ contract StdAssertionsTest is StdAssertions {
         vm._expectCheatcodeRevert(
             bytes(
                 string.concat(
-                    "Call return data does not match: ", vm.toString(returnDataA), " != ", vm.toString(returnDataB)
+                    'Call return data does not match: ',
+                    vm.toString(returnDataA),
+                    ' != ',
+                    vm.toString(returnDataB)
                 )
             )
         );
@@ -80,7 +83,10 @@ contract StdAssertionsTest is StdAssertions {
         vm._expectCheatcodeRevert(
             bytes(
                 string.concat(
-                    "Call revert data does not match: ", vm.toString(revertDataA), " != ", vm.toString(revertDataB)
+                    'Call revert data does not match: ',
+                    vm.toString(revertDataA),
+                    ' != ',
+                    vm.toString(revertDataB)
                 )
             )
         );
@@ -97,10 +103,10 @@ contract StdAssertionsTest is StdAssertions {
         address targetA = address(new TestMockCall(returnDataA, SHOULD_RETURN));
         address targetB = address(new TestMockCall(returnDataB, SHOULD_REVERT));
 
-        vm.expectRevert(bytes("assertion failed"));
+        vm.expectRevert(bytes('assertion failed'));
         this.assertEqCallExternal(targetA, callDataA, targetB, callDataB, strictRevertData);
 
-        vm.expectRevert(bytes("assertion failed"));
+        vm.expectRevert(bytes('assertion failed'));
         this.assertEqCallExternal(targetB, callDataB, targetA, callDataA, strictRevertData);
     }
 

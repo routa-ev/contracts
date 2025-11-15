@@ -3,8 +3,8 @@ pragma solidity >=0.6.2 <0.9.0;
 
 pragma experimental ABIEncoderV2;
 
-import {IMulticall3} from "./interfaces/IMulticall3.sol";
-import {VmSafe} from "./Vm.sol";
+import {IMulticall3} from './interfaces/IMulticall3.sol';
+import {VmSafe} from './Vm.sol';
 
 abstract contract StdUtils {
     /*//////////////////////////////////////////////////////////////////////////
@@ -12,7 +12,7 @@ abstract contract StdUtils {
     //////////////////////////////////////////////////////////////////////////*/
 
     IMulticall3 private constant multicall = IMulticall3(0xcA11bde05977b3631167028862bE2a173976CA11);
-    VmSafe private constant vm = VmSafe(address(uint160(uint256(keccak256("hevm cheat code")))));
+    VmSafe private constant vm = VmSafe(address(uint160(uint256(keccak256('hevm cheat code')))));
     address private constant CONSOLE2_ADDRESS = 0x000000000000000000636F6e736F6c652e6c6f67;
     uint256 private constant INT256_MIN_ABS =
         57896044618658097711785492504343953926634992332820282019728792003956564819968;
@@ -29,7 +29,7 @@ abstract contract StdUtils {
     //////////////////////////////////////////////////////////////////////////*/
 
     function _bound(uint256 x, uint256 min, uint256 max) internal pure virtual returns (uint256 result) {
-        require(min <= max, "StdUtils bound(uint256,uint256,uint256): Max is less than min.");
+        require(min <= max, 'StdUtils bound(uint256,uint256,uint256): Max is less than min.');
         // If x is between min and max, return x directly. This is to ensure that dictionary values
         // do not get shifted if the min is nonzero. More info: https://github.com/foundry-rs/forge-std/issues/188
         if (x >= min && x <= max) return x;
@@ -57,11 +57,11 @@ abstract contract StdUtils {
 
     function bound(uint256 x, uint256 min, uint256 max) internal pure virtual returns (uint256 result) {
         result = _bound(x, min, max);
-        console2_log_StdUtils("Bound result", result);
+        console2_log_StdUtils('Bound result', result);
     }
 
     function _bound(int256 x, int256 min, int256 max) internal pure virtual returns (int256 result) {
-        require(min <= max, "StdUtils bound(int256,int256,int256): Max is less than min.");
+        require(min <= max, 'StdUtils bound(int256,int256,int256): Max is less than min.');
 
         // Shifting all int256 values to uint256 to use _bound function. The range of two types are:
         // int256 : -(2**255) ~ (2**255 - 1)
@@ -82,7 +82,7 @@ abstract contract StdUtils {
 
     function bound(int256 x, int256 min, int256 max) internal pure virtual returns (int256 result) {
         result = _bound(x, min, max);
-        console2_log_StdUtils("Bound result", vm.toString(result));
+        console2_log_StdUtils('Bound result', vm.toString(result));
     }
 
     function boundPrivateKey(uint256 privateKey) internal pure virtual returns (uint256 result) {
@@ -90,36 +90,35 @@ abstract contract StdUtils {
     }
 
     function bytesToUint(bytes memory b) internal pure virtual returns (uint256) {
-        require(b.length <= 32, "StdUtils bytesToUint(bytes): Bytes length exceeds 32.");
+        require(b.length <= 32, 'StdUtils bytesToUint(bytes): Bytes length exceeds 32.');
         return abi.decode(abi.encodePacked(new bytes(32 - b.length), b), (uint256));
     }
 
     /// @dev Compute the address a contract will be deployed at for a given deployer address and nonce
     function computeCreateAddress(address deployer, uint256 nonce) internal pure virtual returns (address) {
-        console2_log_StdUtils("computeCreateAddress is deprecated. Please use vm.computeCreateAddress instead.");
+        console2_log_StdUtils('computeCreateAddress is deprecated. Please use vm.computeCreateAddress instead.');
         return vm.computeCreateAddress(deployer, nonce);
     }
 
-    function computeCreate2Address(bytes32 salt, bytes32 initcodeHash, address deployer)
-        internal
-        pure
-        virtual
-        returns (address)
-    {
-        console2_log_StdUtils("computeCreate2Address is deprecated. Please use vm.computeCreate2Address instead.");
+    function computeCreate2Address(
+        bytes32 salt,
+        bytes32 initcodeHash,
+        address deployer
+    ) internal pure virtual returns (address) {
+        console2_log_StdUtils('computeCreate2Address is deprecated. Please use vm.computeCreate2Address instead.');
         return vm.computeCreate2Address(salt, initcodeHash, deployer);
     }
 
     /// @dev returns the address of a contract created with CREATE2 using the default CREATE2 deployer
     function computeCreate2Address(bytes32 salt, bytes32 initCodeHash) internal pure returns (address) {
-        console2_log_StdUtils("computeCreate2Address is deprecated. Please use vm.computeCreate2Address instead.");
+        console2_log_StdUtils('computeCreate2Address is deprecated. Please use vm.computeCreate2Address instead.');
         return vm.computeCreate2Address(salt, initCodeHash);
     }
 
     /// @dev returns the hash of the init code (creation code + no args) used in CREATE2 with no constructor arguments
     /// @param creationCode the creation code of a contract C, as returned by type(C).creationCode
     function hashInitCode(bytes memory creationCode) internal pure returns (bytes32) {
-        return hashInitCode(creationCode, "");
+        return hashInitCode(creationCode, '');
     }
 
     /// @dev returns the hash of the init code (creation code + ABI-encoded args) used in CREATE2
@@ -130,16 +129,15 @@ abstract contract StdUtils {
     }
 
     // Performs a single call with Multicall3 to query the ERC-20 token balances of the given addresses.
-    function getTokenBalances(address token, address[] memory addresses)
-        internal
-        virtual
-        returns (uint256[] memory balances)
-    {
+    function getTokenBalances(
+        address token,
+        address[] memory addresses
+    ) internal virtual returns (uint256[] memory balances) {
         uint256 tokenCodeSize;
         assembly {
             tokenCodeSize := extcodesize(token)
         }
-        require(tokenCodeSize > 0, "StdUtils getTokenBalances(address,address[]): Token address is not a contract.");
+        require(tokenCodeSize > 0, 'StdUtils getTokenBalances(address,address[]): Token address is not a contract.');
 
         // ABI encode the aggregate call to Multicall3.
         uint256 length = addresses.length;
@@ -170,11 +168,9 @@ abstract contract StdUtils {
     // This section is used to prevent the compilation of console, which shortens the compilation time when console is
     // not used elsewhere. We also trick the compiler into letting us make the console log methods as `pure` to avoid
     // any breaking changes to function signatures.
-    function _castLogPayloadViewToPure(function(bytes memory) internal view fnIn)
-        internal
-        pure
-        returns (function(bytes memory) internal pure fnOut)
-    {
+    function _castLogPayloadViewToPure(
+        function(bytes memory) internal view fnIn
+    ) internal pure returns (function(bytes memory) internal pure fnOut) {
         assembly {
             fnOut := fnIn
         }
@@ -195,14 +191,14 @@ abstract contract StdUtils {
     }
 
     function console2_log_StdUtils(string memory p0) private pure {
-        _sendLogPayload(abi.encodeWithSignature("log(string)", p0));
+        _sendLogPayload(abi.encodeWithSignature('log(string)', p0));
     }
 
     function console2_log_StdUtils(string memory p0, uint256 p1) private pure {
-        _sendLogPayload(abi.encodeWithSignature("log(string,uint256)", p0, p1));
+        _sendLogPayload(abi.encodeWithSignature('log(string,uint256)', p0, p1));
     }
 
     function console2_log_StdUtils(string memory p0, string memory p1) private pure {
-        _sendLogPayload(abi.encodeWithSignature("log(string,string)", p0, p1));
+        _sendLogPayload(abi.encodeWithSignature('log(string,string)', p0, p1));
     }
 }

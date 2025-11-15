@@ -1,14 +1,18 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.6.2;
 
-import {IERC165} from "./IERC165.sol";
+import {IERC165} from './IERC165.sol';
 
 /// @dev Interface of the ERC7575 "Multi-Asset ERC-4626 Vaults", as defined in
 /// https://eips.ethereum.org/EIPS/eip-7575
 interface IERC7575 is IERC165 {
     event Deposit(address indexed sender, address indexed owner, uint256 assets, uint256 shares);
     event Withdraw(
-        address indexed sender, address indexed receiver, address indexed owner, uint256 assets, uint256 shares
+        address indexed sender,
+        address indexed receiver,
+        address indexed owner,
+        uint256 assets,
+        uint256 shares
     );
 
     /**
