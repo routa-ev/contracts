@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.13;
 
-import {VmSafe} from "./Vm.sol";
-import {Variable, Type, TypeKind, LibVariable} from "./LibVariable.sol";
+import {VmSafe} from './Vm.sol';
+import {Variable, Type, TypeKind, LibVariable} from './LibVariable.sol';
 
 /// @notice  A contract that parses a toml configuration file and load its
 ///          variables into storage, automatically casting them, on deployment.
@@ -35,7 +35,7 @@ contract StdConfig {
     using LibVariable for Type;
     using LibVariable for TypeKind;
 
-    VmSafe private constant vm = VmSafe(address(uint160(uint256(keccak256("hevm cheat code")))));
+    VmSafe private constant vm = VmSafe(address(uint160(uint256(keccak256('hevm cheat code')))));
 
     /// @dev Types: `bool`, `address`, `bytes32`, `uint`, `ìnt`, `string`, `bytes`.
     uint8 private constant NUM_TYPES = 7;
@@ -91,13 +91,13 @@ contract StdConfig {
         _filePath = configFilePath;
         _writeToFile = writeToFile;
         string memory content = vm.resolveEnv(vm.readFile(configFilePath));
-        string[] memory chain_keys = vm.parseTomlKeys(content, "$");
+        string[] memory chain_keys = vm.parseTomlKeys(content, '$');
 
         // Cache the entire configuration to storage
         for (uint256 i = 0; i < chain_keys.length; i++) {
             string memory chain_key = chain_keys[i];
             // Ignore top-level keys that are not tables
-            if (vm.parseTomlKeys(content, string.concat("$.", chain_key)).length == 0) {
+            if (vm.parseTomlKeys(content, string.concat('$.', chain_key)).length == 0) {
                 continue;
             }
             uint256 chainId = resolveChainId(chain_key);
@@ -105,7 +105,7 @@ contract StdConfig {
 
             // Cache the configure rpc endpoint for that chain.
             // Falls back to `[rpc_endpoints]`. Panics if no rpc endpoint is configured.
-            try vm.parseTomlString(content, string.concat("$.", chain_key, ".endpoint_url")) returns (
+            try vm.parseTomlString(content, string.concat('$.', chain_key, '.endpoint_url')) returns (
                 string memory url
             ) {
                 _rpcOf[chainId] = vm.resolveEnv(url);
@@ -116,13 +116,13 @@ contract StdConfig {
             // Iterate through all the available `TypeKind`s (except `None`) to create the sub-section paths
             for (uint8 t = 1; t <= NUM_TYPES; t++) {
                 TypeKind ty = TypeKind(t);
-                string memory typePath = string.concat("$.", chain_key, ".", ty.toTomlKey());
+                string memory typePath = string.concat('$.', chain_key, '.', ty.toTomlKey());
 
                 try vm.parseTomlKeys(content, typePath) returns (string[] memory keys) {
                     for (uint256 j = 0; j < keys.length; j++) {
                         string memory key = keys[j];
                         if (_typeOf[chainId][key].kind == TypeKind.None) {
-                            _loadAndCacheValue(content, string.concat(typePath, ".", key), chainId, key, ty);
+                            _loadAndCacheValue(content, string.concat(typePath, '.', key), chainId, key, ty);
                         } else {
                             revert AlreadyInitialized(key);
                         }
@@ -294,7 +294,7 @@ contract StdConfig {
     /// @param jsonValue The JSON-formatted value to write.
     function _writeToToml(uint256 chainId, string memory ty, string memory key, string memory jsonValue) private {
         string memory chainKey = _getChainKeyFromId(chainId);
-        string memory valueKey = string.concat("$.", chainKey, ".", ty, ".", key);
+        string memory valueKey = string.concat('$.', chainKey, '.', ty, '.', key);
         vm.writeToml(jsonValue, _filePath, valueKey);
     }
 
@@ -457,12 +457,12 @@ contract StdConfig {
         _ensureTypeConsistency(chainId, key, ty);
         _dataOf[chainId][key] = abi.encode(value);
         if (_writeToFile) {
-            string memory json = "[";
+            string memory json = '[';
             for (uint256 i = 0; i < value.length; i++) {
                 json = string.concat(json, vm.toString(value[i]));
-                if (i < value.length - 1) json = string.concat(json, ",");
+                if (i < value.length - 1) json = string.concat(json, ',');
             }
-            json = string.concat(json, "]");
+            json = string.concat(json, ']');
             _writeToToml(chainId, ty.kind.toTomlKey(), key, json);
         }
     }
@@ -480,12 +480,12 @@ contract StdConfig {
         _ensureTypeConsistency(chainId, key, ty);
         _dataOf[chainId][key] = abi.encode(value);
         if (_writeToFile) {
-            string memory json = "[";
+            string memory json = '[';
             for (uint256 i = 0; i < value.length; i++) {
                 json = string.concat(json, _quote(vm.toString(value[i])));
-                if (i < value.length - 1) json = string.concat(json, ",");
+                if (i < value.length - 1) json = string.concat(json, ',');
             }
-            json = string.concat(json, "]");
+            json = string.concat(json, ']');
             _writeToToml(chainId, ty.kind.toTomlKey(), key, json);
         }
     }
@@ -503,12 +503,12 @@ contract StdConfig {
         _ensureTypeConsistency(chainId, key, ty);
         _dataOf[chainId][key] = abi.encode(value);
         if (_writeToFile) {
-            string memory json = "[";
+            string memory json = '[';
             for (uint256 i = 0; i < value.length; i++) {
                 json = string.concat(json, _quote(vm.toString(value[i])));
-                if (i < value.length - 1) json = string.concat(json, ",");
+                if (i < value.length - 1) json = string.concat(json, ',');
             }
-            json = string.concat(json, "]");
+            json = string.concat(json, ']');
             _writeToToml(chainId, ty.kind.toTomlKey(), key, json);
         }
     }
@@ -526,12 +526,12 @@ contract StdConfig {
         _ensureTypeConsistency(chainId, key, ty);
         _dataOf[chainId][key] = abi.encode(value);
         if (_writeToFile) {
-            string memory json = "[";
+            string memory json = '[';
             for (uint256 i = 0; i < value.length; i++) {
                 json = string.concat(json, vm.toString(value[i]));
-                if (i < value.length - 1) json = string.concat(json, ",");
+                if (i < value.length - 1) json = string.concat(json, ',');
             }
-            json = string.concat(json, "]");
+            json = string.concat(json, ']');
             _writeToToml(chainId, ty.kind.toTomlKey(), key, json);
         }
     }
@@ -549,12 +549,12 @@ contract StdConfig {
         _ensureTypeConsistency(chainId, key, ty);
         _dataOf[chainId][key] = abi.encode(value);
         if (_writeToFile) {
-            string memory json = "[";
+            string memory json = '[';
             for (uint256 i = 0; i < value.length; i++) {
                 json = string.concat(json, vm.toString(value[i]));
-                if (i < value.length - 1) json = string.concat(json, ",");
+                if (i < value.length - 1) json = string.concat(json, ',');
             }
-            json = string.concat(json, "]");
+            json = string.concat(json, ']');
             _writeToToml(chainId, ty.kind.toTomlKey(), key, json);
         }
     }
@@ -572,12 +572,12 @@ contract StdConfig {
         _ensureTypeConsistency(chainId, key, ty);
         _dataOf[chainId][key] = abi.encode(value);
         if (_writeToFile) {
-            string memory json = "[";
+            string memory json = '[';
             for (uint256 i = 0; i < value.length; i++) {
                 json = string.concat(json, _quote(value[i]));
-                if (i < value.length - 1) json = string.concat(json, ",");
+                if (i < value.length - 1) json = string.concat(json, ',');
             }
-            json = string.concat(json, "]");
+            json = string.concat(json, ']');
             _writeToToml(chainId, ty.kind.toTomlKey(), key, json);
         }
     }
@@ -595,12 +595,12 @@ contract StdConfig {
         _ensureTypeConsistency(chainId, key, ty);
         _dataOf[chainId][key] = abi.encode(value);
         if (_writeToFile) {
-            string memory json = "[";
+            string memory json = '[';
             for (uint256 i = 0; i < value.length; i++) {
                 json = string.concat(json, _quote(vm.toString(value[i])));
-                if (i < value.length - 1) json = string.concat(json, ",");
+                if (i < value.length - 1) json = string.concat(json, ',');
             }
-            json = string.concat(json, "]");
+            json = string.concat(json, ']');
             _writeToToml(chainId, ty.kind.toTomlKey(), key, json);
         }
     }

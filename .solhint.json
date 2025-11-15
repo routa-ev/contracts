@@ -1,0 +1,9 @@
+{
+  "extends": "solhint:recommended",
+  "rules": {
+    "quotes": ["error", "single"],
+    "duplicated-imports": "error",
+    "imports-on-top": "warn",
+    "imports-order": "warn"
+  }
+}

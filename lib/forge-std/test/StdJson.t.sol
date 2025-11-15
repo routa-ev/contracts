@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.7.0 <0.9.0;
 
-import {Test, stdJson} from "../src/Test.sol";
+import {Test, stdJson} from '../src/Test.sol';
 
 contract StdJsonTest is Test {
     using stdJson for string;
@@ -11,7 +11,7 @@ contract StdJsonTest is Test {
 
     function setUp() public {
         root = vm.projectRoot();
-        path = string.concat(root, "/test/fixtures/test.json");
+        path = string.concat(root, '/test/fixtures/test.json');
     }
 
     struct SimpleJson {
@@ -27,23 +27,23 @@ contract StdJsonTest is Test {
 
     function test_readJson() public view {
         string memory json = vm.readFile(path);
-        assertEq(json.readUint(".a"), 123);
+        assertEq(json.readUint('.a'), 123);
     }
 
     function test_writeJson() public {
-        string memory json = "json";
-        json.serialize("a", uint256(123));
-        string memory semiFinal = json.serialize("b", string("test"));
-        string memory finalJson = json.serialize("c", semiFinal);
+        string memory json = 'json';
+        json.serialize('a', uint256(123));
+        string memory semiFinal = json.serialize('b', string('test'));
+        string memory finalJson = json.serialize('c', semiFinal);
         finalJson.write(path);
 
         string memory json_ = vm.readFile(path);
-        bytes memory data = json_.parseRaw("$");
+        bytes memory data = json_.parseRaw('$');
         NestedJson memory decodedData = abi.decode(data, (NestedJson));
 
         assertEq(decodedData.a, 123);
-        assertEq(decodedData.b, "test");
+        assertEq(decodedData.b, 'test');
         assertEq(decodedData.c.a, 123);
-        assertEq(decodedData.c.b, "test");
+        assertEq(decodedData.c.b, 'test');
     }
 }

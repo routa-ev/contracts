@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.13;
 
-import {Test} from "../src/Test.sol";
-import {Variable, Type, TypeKind, LibVariable} from "../src/LibVariable.sol";
+import {Test} from '../src/Test.sol';
+import {Variable, Type, TypeKind, LibVariable} from '../src/LibVariable.sol';
 
 contract LibVariableTest is Test {
     using LibVariable for Type;
@@ -31,7 +31,7 @@ contract LibVariableTest is Test {
         helper = new LibVariableHelper();
 
         // UNINITIALIZED
-        uninitVar = Variable(Type(TypeKind.None, false), "");
+        uninitVar = Variable(Type(TypeKind.None, false), '');
 
         // SINGLE VALUES
         boolVar = Variable(Type(TypeKind.Bool, false), abi.encode(true));
@@ -39,8 +39,8 @@ contract LibVariableTest is Test {
         bytes32Var = Variable(Type(TypeKind.Bytes32, false), abi.encode(bytes32(uint256(42))));
         uintVar = Variable(Type(TypeKind.Uint256, false), abi.encode(uint256(123)));
         intVar = Variable(Type(TypeKind.Int256, false), abi.encode(int256(-123)));
-        stringVar = Variable(Type(TypeKind.String, false), abi.encode("hello world"));
-        bytesVar = Variable(Type(TypeKind.Bytes, false), abi.encode(hex"c0ffee"));
+        stringVar = Variable(Type(TypeKind.String, false), abi.encode('hello world'));
+        bytesVar = Variable(Type(TypeKind.Bytes, false), abi.encode(hex'c0ffee'));
 
         // ARRAY VALUES
         bool[] memory bools = new bool[](2);
@@ -69,13 +69,13 @@ contract LibVariableTest is Test {
         intArrayVar = Variable(Type(TypeKind.Int256, true), abi.encode(ints));
 
         string[] memory strings = new string[](2);
-        strings[0] = "one";
-        strings[1] = "two";
+        strings[0] = 'one';
+        strings[1] = 'two';
         stringArrayVar = Variable(Type(TypeKind.String, true), abi.encode(strings));
 
         bytes[] memory b = new bytes[](2);
-        b[0] = hex"01";
-        b[1] = hex"02";
+        b[0] = hex'01';
+        b[1] = hex'02';
         bytesArrayVar = Variable(Type(TypeKind.Bytes, true), abi.encode(b));
     }
 
@@ -83,26 +83,26 @@ contract LibVariableTest is Test {
 
     function test_TypeHelpers() public view {
         // TypeKind.toString()
-        assertEq(TypeKind.None.toString(), "none");
-        assertEq(TypeKind.Bool.toString(), "bool");
-        assertEq(TypeKind.Address.toString(), "address");
-        assertEq(TypeKind.Bytes32.toString(), "bytes32");
-        assertEq(TypeKind.Uint256.toString(), "uint256");
-        assertEq(TypeKind.Int256.toString(), "int256");
-        assertEq(TypeKind.String.toString(), "string");
-        assertEq(TypeKind.Bytes.toString(), "bytes");
+        assertEq(TypeKind.None.toString(), 'none');
+        assertEq(TypeKind.Bool.toString(), 'bool');
+        assertEq(TypeKind.Address.toString(), 'address');
+        assertEq(TypeKind.Bytes32.toString(), 'bytes32');
+        assertEq(TypeKind.Uint256.toString(), 'uint256');
+        assertEq(TypeKind.Int256.toString(), 'int256');
+        assertEq(TypeKind.String.toString(), 'string');
+        assertEq(TypeKind.Bytes.toString(), 'bytes');
 
         // TypeKind.toTomlKey()
-        assertEq(TypeKind.Uint256.toTomlKey(), "uint");
-        assertEq(TypeKind.Int256.toTomlKey(), "int");
-        assertEq(TypeKind.Bytes32.toTomlKey(), "bytes32");
+        assertEq(TypeKind.Uint256.toTomlKey(), 'uint');
+        assertEq(TypeKind.Int256.toTomlKey(), 'int');
+        assertEq(TypeKind.Bytes32.toTomlKey(), 'bytes32');
 
         // Type.toString()
-        assertEq(boolVar.ty.toString(), "bool");
-        assertEq(boolArrayVar.ty.toString(), "bool[]");
-        assertEq(uintVar.ty.toString(), "uint256");
-        assertEq(uintArrayVar.ty.toString(), "uint256[]");
-        assertEq(uninitVar.ty.toString(), "none");
+        assertEq(boolVar.ty.toString(), 'bool');
+        assertEq(boolArrayVar.ty.toString(), 'bool[]');
+        assertEq(uintVar.ty.toString(), 'uint256');
+        assertEq(uintArrayVar.ty.toString(), 'uint256[]');
+        assertEq(uninitVar.ty.toString(), 'none');
 
         // Type.isEqual()
         assertTrue(boolVar.ty.isEqual(Type(TypeKind.Bool, false)));
@@ -121,8 +121,8 @@ contract LibVariableTest is Test {
         assertEq(helper.toBytes32(bytes32Var), bytes32(uint256(42)));
         assertEq(helper.toUint256(uintVar), 123);
         assertEq(helper.toInt256(intVar), -123);
-        assertEq(helper.toString(stringVar), "hello world");
-        assertEq(helper.toBytes(bytesVar), hex"c0ffee");
+        assertEq(helper.toString(stringVar), 'hello world');
+        assertEq(helper.toBytes(bytesVar), hex'c0ffee');
 
         // Bool array
         bool[] memory bools = helper.toBoolArray(boolArrayVar);
@@ -139,8 +139,8 @@ contract LibVariableTest is Test {
         // String array
         string[] memory strings = helper.toStringArray(stringArrayVar);
         assertEq(strings.length, 2);
-        assertEq(strings[0], "one");
-        assertEq(strings[1], "two");
+        assertEq(strings[0], 'one');
+        assertEq(strings[1], 'two');
     }
 
     function test_Downcasting() public view {
@@ -197,29 +197,29 @@ contract LibVariableTest is Test {
 
     function testRevert_TypeMismatch() public {
         // Single values
-        vm.expectRevert(abi.encodeWithSelector(LibVariable.TypeMismatch.selector, "uint256", "bool"));
+        vm.expectRevert(abi.encodeWithSelector(LibVariable.TypeMismatch.selector, 'uint256', 'bool'));
         helper.toUint256(boolVar);
 
-        vm.expectRevert(abi.encodeWithSelector(LibVariable.TypeMismatch.selector, "address", "string"));
+        vm.expectRevert(abi.encodeWithSelector(LibVariable.TypeMismatch.selector, 'address', 'string'));
         helper.toAddress(stringVar);
 
         // Arrays
-        vm.expectRevert(abi.encodeWithSelector(LibVariable.TypeMismatch.selector, "uint256[]", "bool[]"));
+        vm.expectRevert(abi.encodeWithSelector(LibVariable.TypeMismatch.selector, 'uint256[]', 'bool[]'));
         helper.toUint256Array(boolArrayVar);
 
-        vm.expectRevert(abi.encodeWithSelector(LibVariable.TypeMismatch.selector, "address[]", "string[]"));
+        vm.expectRevert(abi.encodeWithSelector(LibVariable.TypeMismatch.selector, 'address[]', 'string[]'));
         helper.toAddressArray(stringArrayVar);
 
         // Single value to array
-        vm.expectRevert(abi.encodeWithSelector(LibVariable.TypeMismatch.selector, "bool[]", "bool"));
+        vm.expectRevert(abi.encodeWithSelector(LibVariable.TypeMismatch.selector, 'bool[]', 'bool'));
         helper.toBoolArray(boolVar);
 
         // Array to single value
-        vm.expectRevert(abi.encodeWithSelector(LibVariable.TypeMismatch.selector, "bool", "bool[]"));
+        vm.expectRevert(abi.encodeWithSelector(LibVariable.TypeMismatch.selector, 'bool', 'bool[]'));
         helper.toBool(boolArrayVar);
 
         // assertEq reverts
-        vm.expectRevert(abi.encodeWithSelector(LibVariable.TypeMismatch.selector, "uint256", "bool"));
+        vm.expectRevert(abi.encodeWithSelector(LibVariable.TypeMismatch.selector, 'uint256', 'bool'));
         helper.assertEq(boolVar.ty, Type(TypeKind.Uint256, false));
     }
 
@@ -249,7 +249,10 @@ contract LibVariableTest is Test {
         uintArray[0] = 10;
         uintArray[1] = uint256(type(uint64).max) + 1;
         Variable memory uintArrayLarge = Variable(Type(TypeKind.Uint256, true), abi.encode(uintArray));
-        expectedErr = abi.encodeWithSelector(LibVariable.UnsafeCast.selector, "value in array does not fit in 'uint64'");
+        expectedErr = abi.encodeWithSelector(
+            LibVariable.UnsafeCast.selector,
+            "value in array does not fit in 'uint64'"
+        );
 
         vm.expectRevert(expectedErr);
         helper.toUint64Array(uintArrayLarge);

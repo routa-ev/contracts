@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.7.0 <0.9.0;
 
-import {Test, stdToml} from "../src/Test.sol";
+import {Test, stdToml} from '../src/Test.sol';
 
 contract StdTomlTest is Test {
     using stdToml for string;
@@ -11,7 +11,7 @@ contract StdTomlTest is Test {
 
     function setUp() public {
         root = vm.projectRoot();
-        path = string.concat(root, "/test/fixtures/test.toml");
+        path = string.concat(root, '/test/fixtures/test.toml');
     }
 
     struct SimpleToml {
@@ -27,23 +27,23 @@ contract StdTomlTest is Test {
 
     function test_readToml() public view {
         string memory json = vm.readFile(path);
-        assertEq(json.readUint(".a"), 123);
+        assertEq(json.readUint('.a'), 123);
     }
 
     function test_writeToml() public {
-        string memory json = "json";
-        json.serialize("a", uint256(123));
-        string memory semiFinal = json.serialize("b", string("test"));
-        string memory finalJson = json.serialize("c", semiFinal);
+        string memory json = 'json';
+        json.serialize('a', uint256(123));
+        string memory semiFinal = json.serialize('b', string('test'));
+        string memory finalJson = json.serialize('c', semiFinal);
         finalJson.write(path);
 
         string memory toml = vm.readFile(path);
-        bytes memory data = toml.parseRaw("$");
+        bytes memory data = toml.parseRaw('$');
         NestedToml memory decodedData = abi.decode(data, (NestedToml));
 
         assertEq(decodedData.a, 123);
-        assertEq(decodedData.b, "test");
+        assertEq(decodedData.b, 'test');
         assertEq(decodedData.c.a, 123);
-        assertEq(decodedData.c.b, "test");
+        assertEq(decodedData.c.b, 'test');
     }
 }

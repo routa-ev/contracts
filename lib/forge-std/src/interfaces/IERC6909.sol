@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.6.2;
 
-import {IERC165} from "./IERC165.sol";
+import {IERC165} from './IERC165.sol';
 
 /// @dev Required interface of an ERC-6909 compliant contract, as defined in
 /// https://eips.ethereum.org/EIPS/eip-6909
@@ -14,7 +14,11 @@ interface IERC6909 is IERC165 {
 
     /// @dev Emitted when `amount` tokens of type `id` are moved from `sender` to `receiver` initiated by `caller`.
     event Transfer(
-        address caller, address indexed sender, address indexed receiver, uint256 indexed id, uint256 amount
+        address caller,
+        address indexed sender,
+        address indexed receiver,
+        uint256 indexed id,
+        uint256 amount
     );
 
     ///@dev Returns the amount of tokens of type `id` owned by `owner`.

@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.0 <0.9.0;
 
-import {stdError} from "../src/StdError.sol";
-import {Test} from "../src/Test.sol";
+import {stdError} from '../src/StdError.sol';
+import {Test} from '../src/Test.sol';
 
 contract StdErrorsTest is Test {
     ErrorsTest test;

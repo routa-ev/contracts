@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.6.2;
 
-import {IERC20} from "./IERC20.sol";
+import {IERC20} from './IERC20.sol';
 
 /// @dev Interface of the ERC4626 "Tokenized Vault Standard", as defined in
 /// https://eips.ethereum.org/EIPS/eip-4626
@@ -9,7 +9,11 @@ interface IERC4626 is IERC20 {
     event Deposit(address indexed sender, address indexed owner, uint256 assets, uint256 shares);
 
     event Withdraw(
-        address indexed sender, address indexed receiver, address indexed owner, uint256 assets, uint256 shares
+        address indexed sender,
+        address indexed receiver,
+        address indexed owner,
+        uint256 assets,
+        uint256 shares
     );
 
     /// @notice Returns the address of the underlying token used for the Vault for accounting, depositing, and withdrawing.

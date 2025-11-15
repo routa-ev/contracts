@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.6.2 <0.9.0;
 
-import {Vm} from "./Vm.sol";
+import {Vm} from './Vm.sol';
 
 struct FindData {
     uint256 slot;
@@ -25,7 +25,7 @@ library stdStorageSafe {
     event SlotFound(address who, bytes4 fsig, bytes32 keysHash, uint256 slot);
     event WARNING_UninitedSlot(address who, uint256 slot);
 
-    Vm private constant vm = Vm(address(uint160(uint256(keccak256("hevm cheat code")))));
+    Vm private constant vm = Vm(address(uint160(uint256(keccak256('hevm cheat code')))));
     uint256 constant UINT256_MAX = 115792089237316195423570985008687907853269984665640564039457584007913129639935;
 
     function sigs(string memory sigStr) internal pure returns (bytes4) {
@@ -118,12 +118,12 @@ library stdStorageSafe {
         }
         vm.record();
         (, bytes32 callResult) = callTarget(self);
-        (bytes32[] memory reads,) = vm.accesses(address(who));
+        (bytes32[] memory reads, ) = vm.accesses(address(who));
 
         if (reads.length == 0) {
-            revert("stdStorage find(StdStorage): No storage use detected for target.");
+            revert('stdStorage find(StdStorage): No storage use detected for target.');
         } else {
-            for (uint256 i = reads.length; --i >= 0;) {
+            for (uint256 i = reads.length; --i >= 0; ) {
                 bytes32 prev = vm.load(who, reads[i]);
                 if (prev == bytes32(0)) {
                     emit WARNING_UninitedSlot(who, uint256(reads[i]));
@@ -151,15 +151,19 @@ library stdStorageSafe {
                 }
 
                 emit SlotFound(who, fsig, keccak256(abi.encodePacked(params, field_depth)), uint256(reads[i]));
-                self.finds[who][fsig][keccak256(abi.encodePacked(params, field_depth))] =
-                    FindData(uint256(reads[i]), offsetLeft, offsetRight, true);
+                self.finds[who][fsig][keccak256(abi.encodePacked(params, field_depth))] = FindData(
+                    uint256(reads[i]),
+                    offsetLeft,
+                    offsetRight,
+                    true
+                );
                 break;
             }
         }
 
         require(
             self.finds[who][fsig][keccak256(abi.encodePacked(params, field_depth))].found,
-            "stdStorage find(StdStorage): Slot(s) not found."
+            'stdStorage find(StdStorage): Slot(s) not found.'
         );
 
         if (_clear) {
@@ -229,7 +233,7 @@ library stdStorageSafe {
         int256 v = read_int(self);
         if (v == 0) return false;
         if (v == 1) return true;
-        revert("stdStorage read_bool(StdStorage): Cannot decode. Make sure you are reading a bool.");
+        revert('stdStorage read_bool(StdStorage): Cannot decode. Make sure you are reading a bool.');
     }
 
     function read_address(StdStorage storage self) internal returns (address) {
@@ -252,7 +256,7 @@ library stdStorageSafe {
         (bool found, bytes32 key, bytes32 parent_slot) = vm.getMappingKeyAndParentOf(who, bytes32(child));
         if (!found) {
             revert(
-                "stdStorage read_bool(StdStorage): Cannot find parent. Make sure you give a slot and startMappingRecording() has been called."
+                'stdStorage read_bool(StdStorage): Cannot find parent. Make sure you give a slot and startMappingRecording() has been called.'
             );
         }
         return (uint256(parent_slot), key);
@@ -266,15 +270,15 @@ library stdStorageSafe {
         bool found;
         bytes32 root_slot;
         bytes32 parent_slot;
-        (found,, parent_slot) = vm.getMappingKeyAndParentOf(who, bytes32(child));
+        (found, , parent_slot) = vm.getMappingKeyAndParentOf(who, bytes32(child));
         if (!found) {
             revert(
-                "stdStorage read_bool(StdStorage): Cannot find parent. Make sure you give a slot and startMappingRecording() has been called."
+                'stdStorage read_bool(StdStorage): Cannot find parent. Make sure you give a slot and startMappingRecording() has been called.'
             );
         }
         while (found) {
             root_slot = parent_slot;
-            (found,, parent_slot) = vm.getMappingKeyAndParentOf(who, bytes32(root_slot));
+            (found, , parent_slot) = vm.getMappingKeyAndParentOf(who, bytes32(root_slot));
         }
         return uint256(root_slot);
     }
@@ -322,17 +326,18 @@ library stdStorageSafe {
     }
 
     // Returns slot value with updated packed variable.
-    function getUpdatedSlotValue(bytes32 curValue, uint256 varValue, uint256 offsetLeft, uint256 offsetRight)
-        internal
-        pure
-        returns (bytes32 newValue)
-    {
+    function getUpdatedSlotValue(
+        bytes32 curValue,
+        uint256 varValue,
+        uint256 offsetLeft,
+        uint256 offsetRight
+    ) internal pure returns (bytes32 newValue) {
         return bytes32((uint256(curValue) & ~getMaskByOffsets(offsetLeft, offsetRight)) | (varValue << offsetRight));
     }
 }
 
 library stdStorage {
-    Vm private constant vm = Vm(address(uint160(uint256(keccak256("hevm cheat code")))));
+    Vm private constant vm = Vm(address(uint160(uint256(keccak256('hevm cheat code')))));
 
     function sigs(string memory sigStr) internal pure returns (bytes4) {
         return stdStorageSafe.sigs(sigStr);
@@ -438,7 +443,7 @@ library stdStorage {
 
         if (!success || callResult != set) {
             vm.store(who, bytes32(data.slot), curVal);
-            revert("stdStorage find(StdStorage): Failed to write value.");
+            revert('stdStorage find(StdStorage): Failed to write value.');
         }
         clear(self);
     }
