@@ -11,6 +11,8 @@ import {MessageHashUtils} from '@openzeppelin/contracts/utils/cryptography/Messa
 
 contract RoutaEVRideFactory is IRoutaEvRideFactory, ERC2771Context, Ownable {
     address public immutable rideImplementation;
+
+    /// @inheritdoc IRoutaEvRideFactory
     address[] public allRides;
 
     constructor(
@@ -21,6 +23,7 @@ contract RoutaEVRideFactory is IRoutaEvRideFactory, ERC2771Context, Ownable {
         rideImplementation = _rideImplementation;
     }
 
+    /// @inheritdoc IRoutaEvRideFactory
     function deploy(
         address _token,
         uint256 _amountPayable,
@@ -72,6 +75,7 @@ contract RoutaEVRideFactory is IRoutaEvRideFactory, ERC2771Context, Ownable {
         );
     }
 
+    /// @inheritdoc IRoutaEvRideFactory
     function allRidesLength() external view returns (uint256) {
         return allRides.length;
     }
