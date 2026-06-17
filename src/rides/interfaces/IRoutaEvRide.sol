@@ -3,26 +3,35 @@ pragma solidity >=0.8.28;
 import {IRoutaGeo} from './IRoutaGeo.sol';
 
 interface IRoutaEvRide is IRoutaGeo {
+    error AlreadyInitialized();
+    error NotAContract();
+    error NotAllowed();
+    error AlreadySignedAction();
+    error InvalidAction();
+
     enum Status {
         IN_PROGRESS,
         COMPLETED,
         CANCELLED
     }
 
-    /// @notice Initializes the ride with the payer, driver, token, amount payable, fee percentage, start and end coordinates, and payer's permit call. Can only be called once.
+    /// @notice Initializes the ride with the payer, driver, token, amount payable, fee percentage, cancellation fee percentage, start and end coordinates. Can only be called once.
     function initialize(
         address,
         address,
         address,
         uint256,
         uint24,
+        uint24,
         GeoCoords memory,
-        GeoCoords memory,
-        bytes calldata
+        GeoCoords memory
     ) external;
 
+    /// @notice Fulfills the ride. Needs to be called by both the payer and the driver.
+    function fulfill(bytes memory signature) external;
+
     /// @notice Cancels the ride. Can only be called by the payer or the driver.
-    function cancel() external;
+    function cancel(bytes memory signature) external;
 
     /// @notice Returns the address of the factory contract.
     function factory() external view returns (address);
@@ -48,15 +57,18 @@ interface IRoutaEvRide is IRoutaGeo {
     /// @notice Returns the amount of tokens to be paid to the driver.
     function amountPayable() external view returns (uint256);
 
-    /// @notice Returns the amount of tokens paid to the escrow.
-    function amountPaid() external view returns (uint256);
+    /// @notice Returns the amount of tokens paid as fee.
+    function feePaid() external view returns (uint256);
 
     /// @notice Returns the fee rate in basis points (bps).
     function feeBps() external view returns (uint24);
 
+    /// @notice Returns the cancellation fee rate in basis points (bps).
+    function cancellationFeeBps() external view returns (uint24);
+
     /// @notice Returns the start coordinates of the ride.
-    function startCoords() external view returns (GeoCoords memory);
+    function startCoords() external view returns (int256 lat, int256 lng);
 
     /// @notice Returns the end coordinates of the ride.
-    function endCoords() external view returns (GeoCoords memory);
+    function endCoords() external view returns (int256 lat, int256 lng);
 }

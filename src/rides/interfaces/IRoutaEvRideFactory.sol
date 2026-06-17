@@ -11,18 +11,20 @@ interface IRoutaEvRideFactory is IRoutaGeo {
     /// @param _token The address of the token
     /// @param _amountPayable The amount of tokens to be paid (driver's pay + fee)
     /// @param _feePercentageBps The fee percentage in basis points
+    /// @param _cancellationFeePercentageBps The cancellation fee percentage in basis points
     /// @param _startCoords The starting coordinates of the ride
     /// @param _endCoords The ending coordinates of the ride
-    /// @param _payerPermitData The encoded ERC20 permit function with arguments
+    /// @param _packagedData Concatenation of the transaction deadline, and the payer's permit signature
     /// @param _consolidatedSignature The concatenation of the payer's signature and the driver's signature for the ride
     /// @param _messageHash The hash of the message to be signed by the payer and driver
     function deploy(
         address _token,
         uint256 _amountPayable,
         uint24 _feePercentageBps,
+        uint24 _cancellationFeePercentageBps,
         GeoCoords memory _startCoords,
         GeoCoords memory _endCoords,
-        bytes calldata _payerPermitData,
+        bytes calldata _packagedData,
         bytes calldata _consolidatedSignature,
         bytes32 _messageHash
     ) external returns (address);
