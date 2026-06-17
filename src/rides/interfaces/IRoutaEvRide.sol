@@ -8,12 +8,15 @@ interface IRoutaEvRide is IRoutaGeo {
     error NotAllowed();
     error AlreadySignedAction();
     error InvalidAction();
+    error OnlyTeam();
 
     enum Status {
         IN_PROGRESS,
         COMPLETED,
         CANCELLED
     }
+
+    event StatusChanged(Status status, uint256 timestamp);
 
     /// @notice Initializes the ride with the payer, driver, token, amount payable, fee percentage, cancellation fee percentage, start and end coordinates. Can only be called once.
     function initialize(
@@ -28,10 +31,20 @@ interface IRoutaEvRide is IRoutaGeo {
     ) external;
 
     /// @notice Fulfills the ride. Needs to be called by both the payer and the driver.
+    /// @param signature The signature of the actor.
     function fulfill(bytes memory signature) external;
 
     /// @notice Cancels the ride. Can only be called by the payer or the driver.
+    /// @param signature The signature of the actor.
     function cancel(bytes memory signature) external;
+
+    /// @notice Cancels the ride in an emergency. Can serve as conflict resolution in case of a dispute. Can only be called by the team.
+    /// @param _payerAmount The amount to be refunded to the payer.
+    /// @param _driverAmount The amount to be given to the driver.
+    function emergencyCancel(
+        uint256 _payerAmount,
+        uint256 _driverAmount
+    ) external;
 
     /// @notice Returns the address of the factory contract.
     function factory() external view returns (address);

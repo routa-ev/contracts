@@ -6,34 +6,47 @@ import {RoutaEvRideEscrow} from './RoutaEvRideEscrow.sol';
 import {ERC2771Context} from '@openzeppelin/contracts/metatx/ERC2771Context.sol';
 import {ECDSA} from '@openzeppelin/contracts/utils/cryptography/ECDSA.sol';
 import {MessageHashUtils} from '@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol';
+import {Ownable} from '@openzeppelin/contracts/access/Ownable.sol';
 
 contract RoutaEvRide is IRoutaEvRide, ERC2771Context {
+    /// @inheritdoc IRoutaEvRide
     address public payer;
+    /// @inheritdoc IRoutaEvRide
     address public driver;
+    /// @inheritdoc IRoutaEvRide
     address public factory;
+    /// @inheritdoc IRoutaEvRide
     address public escrow;
 
+    /// @inheritdoc IRoutaEvRide
     uint256 public startTime;
+    /// @inheritdoc IRoutaEvRide
     uint256 public endTime;
+    /// @inheritdoc IRoutaEvRide
     uint256 public amountPayable;
+    /// @inheritdoc IRoutaEvRide
     uint256 public feePaid;
+    /// @inheritdoc IRoutaEvRide
     uint24 public feeBps;
+    /// @inheritdoc IRoutaEvRide
     uint24 public cancellationFeeBps;
-    uint24 public constant BASE_BPS = 10000;
+    uint24 internal constant BASE_BPS = 10000;
 
     int256 public startLat;
     int256 public startLng;
     int256 public endLat;
     int256 public endLng;
 
+    /// @inheritdoc IRoutaEvRide
     Status public status;
 
-    mapping(address => bytes) private _signatures;
+    mapping(address => bytes) private _fulfillmentSignatures;
 
     bytes32 private _actionHash;
 
     constructor(address trustedForwarder_) ERC2771Context(trustedForwarder_) {}
 
+    /// @inheritdoc IRoutaEvRide
     function initialize(
         address _payer,
         address _driver,
@@ -68,6 +81,8 @@ contract RoutaEvRide is IRoutaEvRide, ERC2771Context {
         startTime = block.timestamp;
 
         escrow = address(new RoutaEvRideEscrow(_token));
+
+        emit StatusChanged(Status.IN_PROGRESS, startTime);
     }
 
     function fulfill(bytes memory signature) external {
@@ -79,27 +94,95 @@ contract RoutaEvRide is IRoutaEvRide, ERC2771Context {
 
         if (_actionHash != bytes32(0) && _actionHash != messageHash)
             revert InvalidAction();
+
         if (signer != payer && signer != driver) revert NotAllowed();
         if (status != Status.IN_PROGRESS) revert NotAllowed();
-        if (keccak256(_signatures[signer]) != keccak256(new bytes(0)))
-            revert AlreadySignedAction();
+        if (
+            keccak256(_fulfillmentSignatures[signer]) != keccak256(new bytes(0))
+        ) revert AlreadySignedAction();
 
-        _signatures[signer] = signature;
+        _fulfillmentSignatures[signer] = signature;
 
-        if (_actionHash == bytes32(0)) {
-            _actionHash = messageHash;
-        }
-
-        bool payerSigned = keccak256(_signatures[payer]) !=
+        bool payerSigned = keccak256(_fulfillmentSignatures[payer]) !=
             keccak256(new bytes(0));
-        bool driverSigned = keccak256(_signatures[driver]) !=
+        bool driverSigned = keccak256(_fulfillmentSignatures[driver]) !=
             keccak256(new bytes(0));
 
         if (payerSigned && driverSigned) {
             IRoutaEvRideEscrow(escrow).payout();
             endTime = block.timestamp;
             status = Status.COMPLETED;
+            emit StatusChanged(Status.COMPLETED, endTime);
         }
+
+        if (_actionHash == bytes32(0)) {
+            _actionHash = messageHash;
+        }
+    }
+
+    function cancel(bytes memory signature) external {
+        bytes32 messageHash = keccak256(abi.encodePacked('RoutaEv:cancel'));
+        bytes32 signedHash = MessageHashUtils.toEthSignedMessageHash(
+            messageHash
+        );
+        address signer = ECDSA.recover(signedHash, signature);
+
+        if (_actionHash != bytes32(0) && _actionHash != messageHash)
+            revert InvalidAction();
+
+        if (signer != payer && signer != driver) revert NotAllowed();
+        if (status != Status.IN_PROGRESS) revert NotAllowed();
+
+        if (signer == payer) {
+            uint256 penalty = (cancellationFeeBps * amountPayable) / BASE_BPS;
+            // Transfer penalty fee to the driver
+            IRoutaEvRideEscrow(escrow).emergencyPayout(driver, penalty);
+            // Transfer remaining funds to the payer
+            uint256 remaining = amountPayable - penalty;
+            IRoutaEvRideEscrow(escrow).emergencyPayout(payer, remaining);
+            // Transfer fees to the fee receiver
+            address feeReceiver = IRoutaEvRideEscrow(escrow).feeRecipient();
+            IRoutaEvRideEscrow(escrow).emergencyPayout(feeReceiver, feePaid);
+        } else if (signer == driver) {
+            // Refund the payer
+            IRoutaEvRideEscrow(escrow).emergencyPayout(payer, amountPayable);
+            // Transfer fees to the fee receiver
+            address feeReceiver = IRoutaEvRideEscrow(escrow).feeRecipient();
+            IRoutaEvRideEscrow(escrow).emergencyPayout(feeReceiver, feePaid);
+        }
+
+        if (_actionHash == bytes32(0)) {
+            _actionHash = messageHash;
+        }
+
+        endTime = block.timestamp;
+        status = Status.CANCELLED;
+        emit StatusChanged(Status.CANCELLED, endTime);
+    }
+
+    function emergencyCancel(
+        uint256 _payerAmount,
+        uint256 _driverAmount
+    ) external {
+        address sender = _msgSender();
+        address team = Ownable(factory).owner();
+
+        if (sender != team) revert OnlyTeam();
+
+        require(
+            _payerAmount + _driverAmount == amountPayable,
+            'Invalid amounts'
+        );
+
+        IRoutaEvRideEscrow(escrow).emergencyPayout(payer, _payerAmount);
+        IRoutaEvRideEscrow(escrow).emergencyPayout(driver, _driverAmount);
+        // Transfer remaining funds to the fee receiver
+        address feeReceiver = IRoutaEvRideEscrow(escrow).feeRecipient();
+        IRoutaEvRideEscrow(escrow).emergencyPayout(feeReceiver, feePaid);
+
+        endTime = block.timestamp;
+        status = Status.CANCELLED;
+        emit StatusChanged(Status.CANCELLED, endTime);
     }
 
     function startCoords() external view returns (int256 lat, int256 lng) {
