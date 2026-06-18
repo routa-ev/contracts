@@ -85,6 +85,7 @@ contract RoutaEvRide is IRoutaEvRide, ERC2771Context {
         emit StatusChanged(Status.IN_PROGRESS, startTime);
     }
 
+    /// @inheritdoc IRoutaEvRide
     function fulfill(bytes memory signature) external {
         bytes32 messageHash = keccak256(abi.encodePacked('RoutaEv:fulfill'));
         bytes32 signedHash = MessageHashUtils.toEthSignedMessageHash(
@@ -120,6 +121,7 @@ contract RoutaEvRide is IRoutaEvRide, ERC2771Context {
         }
     }
 
+    /// @inheritdoc IRoutaEvRide
     function cancel(bytes memory signature) external {
         bytes32 messageHash = keccak256(abi.encodePacked('RoutaEv:cancel'));
         bytes32 signedHash = MessageHashUtils.toEthSignedMessageHash(
@@ -160,6 +162,7 @@ contract RoutaEvRide is IRoutaEvRide, ERC2771Context {
         emit StatusChanged(Status.CANCELLED, endTime);
     }
 
+    /// @inheritdoc IRoutaEvRide
     function emergencyCancel(
         uint256 _payerAmount,
         uint256 _driverAmount
@@ -185,10 +188,12 @@ contract RoutaEvRide is IRoutaEvRide, ERC2771Context {
         emit StatusChanged(Status.CANCELLED, endTime);
     }
 
+    /// @inheritdoc IRoutaEvRide
     function startCoords() external view returns (int256 lat, int256 lng) {
         return (startLat, startLng);
     }
 
+    /// @inheritdoc IRoutaEvRide
     function endCoords() external view returns (int256 lat, int256 lng) {
         return (endLat, endLng);
     }
