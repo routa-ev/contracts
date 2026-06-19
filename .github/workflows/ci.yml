@@ -2,7 +2,7 @@ name: CI-Forge
 on:
   pull_request:
     branches:
-      - development
+      - "*"
 jobs:
   forge-test:
     name: Forge Test
