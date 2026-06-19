@@ -13,7 +13,7 @@ import {MessageHashUtils} from '@openzeppelin/contracts/utils/cryptography/Messa
 import {IERC20Permit} from '@openzeppelin/contracts/token/ERC20/extensions/IERC20Permit.sol';
 import {IERC20} from '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 
-contract RoutaEVRideFactory is
+contract RoutaEvRideFactory is
     IRoutaEvRideFactory,
     ERC2771Context,
     Ownable,
@@ -23,6 +23,9 @@ contract RoutaEVRideFactory is
 
     /// @inheritdoc IRoutaEvRideFactory
     address[] public allRides;
+
+    /// @inheritdoc IRoutaEvRideFactory
+    mapping(string => address) public offChainReference;
 
     constructor(
         address _rideImplementation,
@@ -34,69 +37,64 @@ contract RoutaEVRideFactory is
 
     /// @inheritdoc IRoutaEvRideFactory
     function deploy(
-        address _token,
-        uint256 _amountPayable,
-        uint24 _feePercentageBps,
-        uint24 _cancellationFeePercentageBps,
-        GeoCoords memory _startCoords,
-        GeoCoords memory _endCoords,
-        bytes calldata _packagedData,
-        bytes calldata _consolidatedSignature,
-        bytes32 _messageHash
+        DeploymentParams memory _params
     ) external returns (address ride) {
-        (bytes calldata a, bytes calldata b) = _splitConsolidatedSignature(
-            _consolidatedSignature
+        (bytes memory a, bytes memory b) = _splitConsolidatedSignature(
+            _params._consolidatedSignature
         );
 
         bytes32 ethSignedHash = MessageHashUtils.toEthSignedMessageHash(
-            _messageHash
+            _params._messageHash
         );
 
         address _payer = ECDSA.recover(ethSignedHash, a);
         address _driver = ECDSA.recover(ethSignedHash, b);
 
         _checkPayer(_payer);
+        _checkOffChainReference(_params._offChainReference);
 
         bytes32 salt = keccak256(
             abi.encodePacked(
                 _payer,
                 _driver,
-                _token,
-                _startCoords.latitude,
-                _startCoords.longitude,
-                _endCoords.latitude,
-                _endCoords.longitude,
+                _params._token,
+                _params._startCoords.latitude,
+                _params._startCoords.longitude,
+                _params._endCoords.latitude,
+                _params._endCoords.longitude,
+                _params._offChainReference,
                 block.timestamp // use block timestamp to ensure uniqueness
             )
         );
 
         ride = Clones.cloneDeterministic(rideImplementation, salt);
         allRides.push(ride);
+        offChainReference[_params._offChainReference] = ride;
 
         IRoutaEvRide(ride).initialize(
             _payer,
             _driver,
-            _token,
-            _amountPayable,
-            _feePercentageBps,
-            _cancellationFeePercentageBps,
-            _startCoords,
-            _endCoords
+            _params._token,
+            _params._amountPayable,
+            _params._feePercentageBps,
+            _params._cancellationFeePercentageBps,
+            _params._startCoords,
+            _params._endCoords
         );
 
         // Get transacton deadline and payer's permit signature
         (uint256 deadline, bytes memory permitSignature) = abi.decode(
-            _packagedData,
+            _params._packagedData,
             (uint256, bytes)
         );
 
         // Verify the permit signature
         (uint8 v, bytes32 r, bytes32 s) = _getVRSFromSignature(permitSignature);
 
-        IERC20Permit(_token).permit(
+        IERC20Permit(_params._token).permit(
             _payer,
             address(this),
-            _amountPayable,
+            _params._amountPayable,
             deadline,
             v,
             r,
@@ -104,12 +102,17 @@ contract RoutaEVRideFactory is
         );
 
         // Transfer the tokens from the payer to this contract
-        _transferFromERC20(_token, _payer, address(this), _amountPayable);
+        _transferFromERC20(
+            _params._token,
+            _payer,
+            address(this),
+            _params._amountPayable
+        );
 
         address escrow = IRoutaEvRide(ride).escrow();
 
         // Approve escrow's spending of exact amount
-        IERC20(_token).approve(escrow, _amountPayable);
+        IERC20(_params._token).approve(escrow, _params._amountPayable);
         // Call `deposit` on escrow
         IRoutaEvRideEscrow(escrow).deposit();
     }
@@ -123,12 +126,23 @@ contract RoutaEVRideFactory is
         if (_payer != _msgSender()) revert InvalidPayer();
     }
 
+    function _checkOffChainReference(string memory _reference) internal view {
+        if (offChainReference[_reference] != address(0))
+            revert UsedOffChainReference();
+    }
+
     function _splitConsolidatedSignature(
-        bytes calldata data
-    ) internal pure returns (bytes calldata a, bytes calldata b) {
+        bytes memory data
+    ) internal pure returns (bytes memory a, bytes memory b) {
         require(data.length == 130, 'Invalid signature length');
-        a = data[0:65];
-        b = data[65:130];
+
+        a = new bytes(65);
+        b = new bytes(65);
+
+        for (uint256 i; i < 65; ++i) {
+            a[i] = data[i];
+            b[i] = data[i + 65];
+        }
     }
 
     function _getVRSFromSignature(
