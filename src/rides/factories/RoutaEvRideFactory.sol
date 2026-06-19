@@ -13,7 +13,7 @@ import {MessageHashUtils} from '@openzeppelin/contracts/utils/cryptography/Messa
 import {IERC20Permit} from '@openzeppelin/contracts/token/ERC20/extensions/IERC20Permit.sol';
 import {IERC20} from '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 
-contract RoutaEVRideFactory is
+contract RoutaEvRideFactory is
     IRoutaEvRideFactory,
     ERC2771Context,
     Ownable,
