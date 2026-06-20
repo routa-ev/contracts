@@ -278,6 +278,7 @@ contract RoutaPaymentChannel is
         if (status == ChannelStatus.Closed) revert ChannelNotActive();
 
         status = ChannelStatus.Closed;
+        emit ChannelStatusChanged(ChannelStatus.Closed, block.timestamp);
     }
 
     function activate() external {
@@ -286,6 +287,7 @@ contract RoutaPaymentChannel is
         if (status == ChannelStatus.Active) revert ChannelAlreadyActive();
 
         status = ChannelStatus.Active;
+        emit ChannelStatusChanged(ChannelStatus.Active, block.timestamp);
     }
 
     function paymentTokensLength() external view returns (uint256) {

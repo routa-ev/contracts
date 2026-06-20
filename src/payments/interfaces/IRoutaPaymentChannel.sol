@@ -63,6 +63,7 @@ interface IRoutaPaymentChannel {
         uint256 _amount,
         uint256 _timestamp
     );
+    event ChannelStatusChanged(ChannelStatus _status, uint256 _timestamp);
 
     /// @notice Initializes the payment channel with the given payment tokens, receiver, and off-chain slug.
     /// @param _paymentTokens The list of payment tokens supported by this channel.
