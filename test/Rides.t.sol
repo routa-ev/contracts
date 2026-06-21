@@ -21,16 +21,13 @@ contract RidesTest is Test {
     ROUTA public routa;
 
     string public offChainReference;
-    string private hashable = '__test__signable__message__';
 
-    bytes32 private messageHash;
     address[] private wallets;
-
     address private token;
 
     uint24 private constant BASE_PS = 10000;
 
-    bytes32 private constant PERMIT_TYPEHASH =
+    bytes32 internal constant PERMIT_TYPEHASH =
         keccak256(
             'Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)'
         );
@@ -39,6 +36,14 @@ contract RidesTest is Test {
         keccak256(
             'ForwardRequest(address from,address to,uint256 value,uint256 gas,uint256 nonce,uint48 deadline,bytes data)'
         );
+
+    bytes32 internal constant RIDE_TYPEHASH =
+        keccak256(
+            'Ride(address _token,uint256 _amountPayable,bytes32 _startCoordsHash,bytes32 _endCoordsHash,bytes32 _offChainReferenceHash)'
+        );
+
+    bytes32 internal constant ACTION_TYPEHASH =
+        keccak256('Action(address ride,uint8 actionType)');
 
     uint256 private teamPk = 0xD0E;
     uint256 private payerPk = 0xA11CE;
@@ -75,12 +80,6 @@ contract RidesTest is Test {
         );
 
         console.log('Off-Chain Reference:', offChainReference);
-
-        messageHash = MessageHashUtils.toEthSignedMessageHash(
-            hashable.generateHash()
-        );
-
-        console.log('Message Hash:', vm.toString(messageHash));
 
         routa = new ROUTA();
         routa.setMinter(team);
@@ -125,6 +124,33 @@ contract RidesTest is Test {
     }
 
     function createConsolidatedSignature() public view returns (bytes memory) {
+        bytes32 structHash = keccak256(
+            abi.encode(
+                RIDE_TYPEHASH,
+                address(routa),
+                12 ether,
+                keccak256(abi.encode(createGeoCoords(0, 0))),
+                keccak256(abi.encode(createGeoCoords(0, 0))),
+                keccak256(bytes(offChainReference))
+            )
+        );
+
+        bytes32 domainSeparator = keccak256(
+            abi.encode(
+                keccak256(
+                    'EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)'
+                ),
+                keccak256('RoutaEvRideFactory'),
+                keccak256('1'),
+                block.chainid,
+                address(factory)
+            )
+        );
+
+        bytes32 messageHash = keccak256(
+            abi.encodePacked('\x19\x01', domainSeparator, structHash)
+        );
+
         (uint8 v0, bytes32 r0, bytes32 s0) = vm.sign(payerPk, messageHash);
         (uint8 v1, bytes32 r1, bytes32 s1) = vm.sign(driverPk, messageHash);
         return
@@ -138,7 +164,6 @@ contract RidesTest is Test {
         IRoutaEvRideFactory.DeploymentParams memory params = IRoutaEvRideFactory
             .DeploymentParams({
                 _offChainReference: offChainReference,
-                _messageHash: hashable.generateHash(),
                 _token: token,
                 _amountPayable: 12 ether,
                 _feePercentageBps: 200,
@@ -207,17 +232,35 @@ contract RidesTest is Test {
         assertEq(factory.allRidesLength(), 1);
     }
 
-    function runRiderFulfillment() public {
-        string memory message = 'RoutaEv:fulfill';
-        bytes32 actionMessageHash = MessageHashUtils.toEthSignedMessageHash(
-            message.generateHash()
+    function runDriverFulfillment() public {
+        address to = factory.offChainReference(offChainReference);
+
+        bytes32 actionStructHash = keccak256(
+            abi.encode(
+                ACTION_TYPEHASH,
+                to,
+                uint8(IRoutaEvRide.ActionType.FULFILL)
+            )
+        );
+        bytes32 rideDomainSeparator = keccak256(
+            abi.encode(
+                keccak256(
+                    'EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)'
+                ),
+                keccak256('RoutaEvRide'),
+                keccak256('1'),
+                block.chainid,
+                to
+            )
+        );
+        bytes32 actionMessageHash = keccak256(
+            abi.encodePacked('\x19\x01', rideDomainSeparator, actionStructHash)
         );
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(driverPk, actionMessageHash);
         bytes memory signature = abi.encodePacked(r, s, v);
 
         // Let the driver sign first
         address from = driver;
-        address to = factory.offChainReference(offChainReference);
         uint256 value = 0;
         uint256 gas = 1000000;
         uint256 nonce = forwarder.nonces(from);
@@ -275,16 +318,34 @@ contract RidesTest is Test {
     }
 
     function runPayerFulfillment() public {
-        string memory message = 'RoutaEv:fulfill';
-        bytes32 actionMessageHash = MessageHashUtils.toEthSignedMessageHash(
-            message.generateHash()
+        address to = factory.offChainReference(offChainReference);
+
+        bytes32 actionStructHash = keccak256(
+            abi.encode(
+                ACTION_TYPEHASH,
+                to,
+                uint8(IRoutaEvRide.ActionType.FULFILL)
+            )
+        );
+        bytes32 rideDomainSeparator = keccak256(
+            abi.encode(
+                keccak256(
+                    'EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)'
+                ),
+                keccak256('RoutaEvRide'),
+                keccak256('1'),
+                block.chainid,
+                to
+            )
+        );
+        bytes32 actionMessageHash = keccak256(
+            abi.encodePacked('\x19\x01', rideDomainSeparator, actionStructHash)
         );
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(payerPk, actionMessageHash);
         bytes memory signature = abi.encodePacked(r, s, v);
 
         // Let the payer sign next
         address from = payer;
-        address to = factory.offChainReference(offChainReference);
         uint256 value = 0;
         uint256 gas = 1000000;
         uint256 nonce = forwarder.nonces(from);
@@ -344,7 +405,7 @@ contract RidesTest is Test {
 
     function test_all() public {
         runDeploymentTest();
-        runRiderFulfillment();
+        runDriverFulfillment();
         runPayerFulfillment();
     }
 }

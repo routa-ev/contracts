@@ -11,14 +11,19 @@ contract RoutaEvRideEscrow is IRoutaEvRideEscrow, BaseTransfer {
     address public immutable factory;
     address public immutable feeRecipient;
 
+    bool private _isDeposited;
+
     constructor(address _token) BaseTransfer() {
         token = _token;
         factory = msg.sender;
 
         feeRecipient = Ownable(IRoutaEvRide(msg.sender).factory()).owner();
+        _isDeposited = false;
     }
 
     function deposit() external {
+        if (_isDeposited) revert AlreadyDeposited();
+
         address sender = msg.sender;
         address rideFactory = IRoutaEvRide(factory).factory();
         uint256 amount = IRoutaEvRide(factory).amountPayable();
@@ -26,6 +31,8 @@ contract RoutaEvRideEscrow is IRoutaEvRideEscrow, BaseTransfer {
 
         if (sender != rideFactory) revert OnlyBaseFactory();
         _transferFromERC20(token, sender, address(this), amount + fee);
+
+        _isDeposited = true;
     }
 
     function payout() external {

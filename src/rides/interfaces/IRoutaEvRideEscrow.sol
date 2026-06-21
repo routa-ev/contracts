@@ -3,6 +3,7 @@ pragma solidity >=0.8.28;
 interface IRoutaEvRideEscrow {
     error OnlyBaseFactory();
     error OnlyFactory();
+    error AlreadyDeposited();
 
     /// @notice Deposits funds into the escrow. Can be called by anyone, and just once.
     function deposit() external;

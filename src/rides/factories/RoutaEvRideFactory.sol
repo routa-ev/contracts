@@ -12,10 +12,12 @@ import {ECDSA} from '@openzeppelin/contracts/utils/cryptography/ECDSA.sol';
 import {MessageHashUtils} from '@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol';
 import {IERC20Permit} from '@openzeppelin/contracts/token/ERC20/extensions/IERC20Permit.sol';
 import {IERC20} from '@openzeppelin/contracts/token/ERC20/IERC20.sol';
+import {EIP712} from '@openzeppelin/contracts/utils/cryptography/EIP712.sol';
 
 contract RoutaEvRideFactory is
     IRoutaEvRideFactory,
     ERC2771Context,
+    EIP712,
     Ownable,
     BaseTransfer
 {
@@ -27,11 +29,21 @@ contract RoutaEvRideFactory is
     /// @inheritdoc IRoutaEvRideFactory
     mapping(string => address) public offChainReference;
 
+    bytes32 public constant RIDE_TYPEHASH =
+        keccak256(
+            'Ride(address _token,uint256 _amountPayable,bytes32 _startCoordsHash,bytes32 _endCoordsHash,bytes32 _offChainReferenceHash)'
+        );
+
     constructor(
         address _rideImplementation,
         address trustedForwarder_,
         address _team
-    ) ERC2771Context(trustedForwarder_) Ownable(_team) BaseTransfer() {
+    )
+        ERC2771Context(trustedForwarder_)
+        Ownable(_team)
+        EIP712('RoutaEvRideFactory', '1')
+        BaseTransfer()
+    {
         rideImplementation = _rideImplementation;
     }
 
@@ -43,12 +55,23 @@ contract RoutaEvRideFactory is
             _params._consolidatedSignature
         );
 
-        bytes32 ethSignedHash = MessageHashUtils.toEthSignedMessageHash(
-            _params._messageHash
+        bytes32 structHash = keccak256(
+            abi.encode(
+                RIDE_TYPEHASH,
+                _params._token,
+                _params._amountPayable,
+                keccak256(abi.encode(_params._startCoords)),
+                keccak256(abi.encode(_params._endCoords)),
+                keccak256(bytes(_params._offChainReference))
+            )
         );
 
-        address _payer = ECDSA.recover(ethSignedHash, a);
-        address _driver = ECDSA.recover(ethSignedHash, b);
+        bytes32 digest = _hashTypedDataV4(structHash);
+
+        address _payer = ECDSA.recover(digest, a);
+        address _driver = ECDSA.recover(digest, b);
+
+        if (_payer == _driver) revert NoSelfRide();
 
         _checkPayer(_payer);
         _checkOffChainReference(_params._offChainReference);
