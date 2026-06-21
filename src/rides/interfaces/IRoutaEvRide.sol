@@ -16,6 +16,12 @@ interface IRoutaEvRide is IRoutaGeo {
         CANCELLED
     }
 
+    enum ActionType {
+        NONE,
+        FULFILL,
+        CANCEL
+    }
+
     event StatusChanged(Status status, uint256 timestamp);
 
     /// @notice Initializes the ride with the payer, driver, token, amount payable, fee percentage, cancellation fee percentage, start and end coordinates. Can only be called once.
@@ -30,7 +36,7 @@ interface IRoutaEvRide is IRoutaGeo {
         GeoCoords memory
     ) external;
 
-    /// @notice Fulfills the ride. Needs to be called by both the payer and the driver.
+    /// @notice Fulfills the ride. Needs to be called by both the payer and the driver. Locks the action-type to prevent cancellation.
     /// @param signature The signature of the actor.
     function fulfill(bytes memory signature) external;
 
@@ -84,4 +90,7 @@ interface IRoutaEvRide is IRoutaGeo {
 
     /// @notice Returns the end coordinates of the ride.
     function endCoords() external view returns (int256 lat, int256 lng);
+
+    /// @notice Returns the type of action performed on the ride.
+    function actionType() external view returns (ActionType);
 }

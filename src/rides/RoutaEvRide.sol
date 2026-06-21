@@ -7,8 +7,9 @@ import {ERC2771Context} from '@openzeppelin/contracts/metatx/ERC2771Context.sol'
 import {ECDSA} from '@openzeppelin/contracts/utils/cryptography/ECDSA.sol';
 import {MessageHashUtils} from '@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol';
 import {Ownable} from '@openzeppelin/contracts/access/Ownable.sol';
+import {EIP712} from '@openzeppelin/contracts/utils/cryptography/EIP712.sol';
 
-contract RoutaEvRide is IRoutaEvRide, ERC2771Context {
+contract RoutaEvRide is IRoutaEvRide, ERC2771Context, EIP712 {
     /// @inheritdoc IRoutaEvRide
     address public payer;
     /// @inheritdoc IRoutaEvRide
@@ -40,11 +41,17 @@ contract RoutaEvRide is IRoutaEvRide, ERC2771Context {
     /// @inheritdoc IRoutaEvRide
     Status public status;
 
+    /// @inheritdoc IRoutaEvRide
+    ActionType public actionType;
+
     mapping(address => bytes) private _fulfillmentSignatures;
 
-    bytes32 private _actionHash;
+    bytes32 constant ACTION_TYPEHASH =
+        keccak256('Action(address ride,uint8 actionType)');
 
-    constructor(address trustedForwarder_) ERC2771Context(trustedForwarder_) {}
+    constructor(
+        address trustedForwarder_
+    ) ERC2771Context(trustedForwarder_) EIP712('RoutaEvRide', '1') {}
 
     /// @inheritdoc IRoutaEvRide
     function initialize(
@@ -60,14 +67,19 @@ contract RoutaEvRide is IRoutaEvRide, ERC2771Context {
         if (factory != address(0)) revert AlreadyInitialized();
 
         status = Status.IN_PROGRESS;
+        actionType = ActionType.NONE;
         payer = _payer;
         driver = _driver;
 
         factory = _msgSender(); // Would fall back to `msg.sender` since this function is called directly by the factory and not via a forwarder
 
+        require(_feeBps <= BASE_BPS);
+
         feeBps = _feeBps;
         feePaid = (_feeBps * _amountPayable) / BASE_BPS;
         amountPayable = _amountPayable - feePaid;
+
+        require(_cancellationFeeBps <= BASE_BPS);
 
         cancellationFeeBps = _cancellationFeeBps;
 
@@ -87,13 +99,17 @@ contract RoutaEvRide is IRoutaEvRide, ERC2771Context {
 
     /// @inheritdoc IRoutaEvRide
     function fulfill(bytes memory signature) external {
-        bytes32 messageHash = keccak256(abi.encodePacked('RoutaEv:fulfill'));
-        bytes32 signedHash = MessageHashUtils.toEthSignedMessageHash(
-            messageHash
+        bytes32 messageHash = keccak256(
+            abi.encode(
+                ACTION_TYPEHASH,
+                address(this),
+                uint8(ActionType.FULFILL)
+            )
         );
-        address signer = ECDSA.recover(signedHash, signature);
+        bytes32 digest = _hashTypedDataV4(messageHash);
+        address signer = ECDSA.recover(digest, signature);
 
-        if (_actionHash != bytes32(0) && _actionHash != messageHash)
+        if (actionType != ActionType.NONE && actionType != ActionType.FULFILL)
             revert InvalidAction();
 
         if (signer != payer && signer != driver) revert NotAllowed();
@@ -116,20 +132,20 @@ contract RoutaEvRide is IRoutaEvRide, ERC2771Context {
             emit StatusChanged(Status.COMPLETED, endTime);
         }
 
-        if (_actionHash == bytes32(0)) {
-            _actionHash = messageHash;
+        if (actionType == ActionType.NONE) {
+            actionType = ActionType.FULFILL;
         }
     }
 
     /// @inheritdoc IRoutaEvRide
     function cancel(bytes memory signature) external {
-        bytes32 messageHash = keccak256(abi.encodePacked('RoutaEv:cancel'));
-        bytes32 signedHash = MessageHashUtils.toEthSignedMessageHash(
-            messageHash
+        bytes32 messageHash = keccak256(
+            abi.encode(ACTION_TYPEHASH, address(this), uint8(ActionType.CANCEL))
         );
-        address signer = ECDSA.recover(signedHash, signature);
+        bytes32 digest = _hashTypedDataV4(messageHash);
+        address signer = ECDSA.recover(digest, signature);
 
-        if (_actionHash != bytes32(0) && _actionHash != messageHash)
+        if (actionType != ActionType.NONE && actionType != ActionType.CANCEL)
             revert InvalidAction();
 
         if (signer != payer && signer != driver) revert NotAllowed();
@@ -153,8 +169,8 @@ contract RoutaEvRide is IRoutaEvRide, ERC2771Context {
             IRoutaEvRideEscrow(escrow).emergencyPayout(feeReceiver, feePaid);
         }
 
-        if (_actionHash == bytes32(0)) {
-            _actionHash = messageHash;
+        if (actionType == ActionType.NONE) {
+            actionType = ActionType.CANCEL;
         }
 
         endTime = block.timestamp;
@@ -171,6 +187,7 @@ contract RoutaEvRide is IRoutaEvRide, ERC2771Context {
         address team = Ownable(factory).owner();
 
         if (sender != team) revert OnlyTeam();
+        if (status != Status.IN_PROGRESS) revert NotAllowed();
 
         require(
             _payerAmount + _driverAmount == amountPayable,

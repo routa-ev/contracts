@@ -7,6 +7,7 @@ interface IRoutaEvRideFactory is IRoutaGeo {
     error InvalidPayer();
     error InvalidSignature();
     error UsedOffChainReference();
+    error NoSelfRide();
 
     struct DeploymentParams {
         address _token;
@@ -17,7 +18,6 @@ interface IRoutaEvRideFactory is IRoutaGeo {
         GeoCoords _endCoords;
         bytes _packagedData;
         bytes _consolidatedSignature;
-        bytes32 _messageHash;
         string _offChainReference;
     }
 
