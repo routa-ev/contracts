@@ -22,7 +22,6 @@ contract RidesTest is Test {
 
     string public offChainReference;
 
-    address[] private wallets;
     address private token;
 
     uint24 private constant BASE_PS = 10000;

@@ -1,17 +1,20 @@
 pragma solidity >=0.8.28;
 
 import {IRoutaPaymentChannel} from './interfaces/IRoutaPaymentChannel.sol';
+import {IRoutaPaymentFactory} from './interfaces/IRoutaPaymentFactory.sol';
 import {BaseTransfer} from './base/BaseTransfer.sol';
 import {ERC2771Context} from '@openzeppelin/contracts/metatx/ERC2771Context.sol';
 import {Ownable} from '@openzeppelin/contracts/access/Ownable.sol';
 import {Context} from '@openzeppelin/contracts/utils/Context.sol';
 import {IERC20Permit} from '@openzeppelin/contracts/token/ERC20/extensions/IERC20Permit.sol';
+import {ReentrancyGuard} from '@openzeppelin/contracts/utils/ReentrancyGuard.sol';
 
 contract RoutaPaymentChannel is
     IRoutaPaymentChannel,
     ERC2771Context,
     BaseTransfer,
-    Ownable
+    Ownable,
+    ReentrancyGuard
 {
     address public constant ETHER = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address public factory;
@@ -27,9 +30,18 @@ contract RoutaPaymentChannel is
     mapping(bytes32 => string) public paymentOffChainReference;
     mapping(string => bytes32) public paymentIdFromOffChainReference;
 
+    bytes32[] public payments;
+
+    uint24 public constant BASE_BPS = 10000;
+
     constructor(
         address trustedForwarder_
-    ) ERC2771Context(trustedForwarder_) BaseTransfer() Ownable(msg.sender) {}
+    )
+        ERC2771Context(trustedForwarder_)
+        BaseTransfer()
+        Ownable(msg.sender)
+        ReentrancyGuard()
+    {}
 
     function initialize(
         address[] memory _paymentTokens,
@@ -61,9 +73,10 @@ contract RoutaPaymentChannel is
         address _token,
         uint256 _amount,
         bytes memory _data
-    ) external returns (bytes32 _paymentId) {
+    ) external nonReentrant returns (bytes32 _paymentId) {
         address sender = _msgSender();
 
+        _checkActive();
         _checkTokenIsAllowed(_token);
         _forceUseNative(_token);
 
@@ -90,13 +103,20 @@ contract RoutaPaymentChannel is
             s
         );
 
+        uint256 fee = (IRoutaPaymentFactory(factory).FEE() * _amount) /
+            BASE_BPS;
+
+        address feeRecipient = Ownable(factory).owner();
+
         // Transfer the token from the sender to this contract
-        _transferFromERC20(_token, sender, address(this), _amount);
+        _transferFromERC20(_token, sender, address(this), _amount - fee);
+        // Transfer the fee to the factory
+        _transferFromERC20(_token, sender, feeRecipient, fee);
 
         // Compose payment
         Payment memory payment = Payment({
             _token: _token,
-            _amount: _amount,
+            _amount: _amount - fee,
             _payer: sender,
             _released: releaseImmediately,
             _revoked: false,
@@ -109,12 +129,13 @@ contract RoutaPaymentChannel is
         _payments[_paymentId] = payment;
         paymentOffChainReference[_paymentId] = ref;
         paymentIdFromOffChainReference[ref] = _paymentId;
+        payments.push(_paymentId);
 
         emit NewPayment(
             _paymentId,
             sender,
             _token,
-            _amount,
+            _amount - fee,
             memo,
             block.timestamp
         );
@@ -123,9 +144,11 @@ contract RoutaPaymentChannel is
     function payWithNative(
         uint256 _amount,
         bytes memory _data
-    ) external payable returns (bytes32 _paymentId) {
+    ) external payable nonReentrant returns (bytes32 _paymentId) {
         address sender = _msgSender();
         address _token = ETHER;
+
+        _checkActive();
 
         // Decode payload
         (
@@ -140,10 +163,18 @@ contract RoutaPaymentChannel is
         _ensurePristineReference(ref);
         require(_amount == msg.value);
 
+        uint256 fee = (IRoutaPaymentFactory(factory).FEE() * _amount) /
+            BASE_BPS;
+
+        address feeRecipient = Ownable(factory).owner();
+
+        // Transfer the fee to the factory
+        _transferNative(feeRecipient, fee);
+
         // Compose payment
         Payment memory payment = Payment({
             _token: _token,
-            _amount: _amount,
+            _amount: _amount - fee,
             _payer: sender,
             _released: releaseImmediately,
             _revoked: false,
@@ -156,18 +187,19 @@ contract RoutaPaymentChannel is
         _payments[_paymentId] = payment;
         paymentOffChainReference[_paymentId] = ref;
         paymentIdFromOffChainReference[ref] = _paymentId;
+        payments.push(_paymentId);
 
         emit NewPayment(
             _paymentId,
             sender,
             _token,
-            _amount,
+            _amount - fee,
             memo,
             block.timestamp
         );
     }
 
-    function claim(bytes32 _paymentId, uint256 _amount) external {
+    function claim(bytes32 _paymentId, uint256 _amount) external nonReentrant {
         _checkOwner();
 
         Payment storage payment = _payments[_paymentId];
@@ -195,7 +227,7 @@ contract RoutaPaymentChannel is
         );
     }
 
-    function releasePayment(bytes32 _paymentId) external {
+    function releasePayment(bytes32 _paymentId) external nonReentrant {
         address sender = _msgSender();
         Payment storage payment = _payments[_paymentId];
 
@@ -209,7 +241,7 @@ contract RoutaPaymentChannel is
         emit ReleasePayment(_paymentId, block.timestamp);
     }
 
-    function refundPayment(bytes32 _paymentId) external {
+    function refundPayment(bytes32 _paymentId) external nonReentrant {
         _checkOwner();
         Payment storage payment = _payments[_paymentId];
 
@@ -228,7 +260,7 @@ contract RoutaPaymentChannel is
         emit RefundPayment(_paymentId, block.timestamp);
     }
 
-    function revokePayment(bytes32 _paymentId) external {
+    function revokePayment(bytes32 _paymentId) external nonReentrant {
         address sender = _msgSender();
 
         Payment storage payment = _payments[_paymentId];
@@ -249,7 +281,10 @@ contract RoutaPaymentChannel is
         emit RevokePayment(_paymentId, block.timestamp);
     }
 
-    function emergencyRelease(bytes32 _paymentId, address _receiver) external {
+    function emergencyRelease(
+        bytes32 _paymentId,
+        address _receiver
+    ) external nonReentrant {
         address sender = _msgSender();
         address team = Ownable(factory).owner();
 
@@ -321,6 +356,10 @@ contract RoutaPaymentChannel is
         _memo = payment._memo;
     }
 
+    function paymentsLength() external view returns (uint256) {
+        return payments.length;
+    }
+
     function _checkTokenIsAllowed(address token) internal view {
         bool allowed = false;
         for (uint256 i = 0; i < paymentTokens.length; i++) {
@@ -351,6 +390,10 @@ contract RoutaPaymentChannel is
             s := mload(add(data, 64))
             v := byte(0, mload(add(data, 96)))
         }
+    }
+
+    function _checkActive() internal view {
+        if (status != ChannelStatus.Active) revert ChannelNotActive();
     }
 
     function _msgSender()

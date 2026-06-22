@@ -143,6 +143,12 @@ interface IRoutaPaymentChannel {
     /// @notice Returns the number of payment tokens.
     function paymentTokensLength() external view returns (uint256);
 
+    /// @notice Returns the payment ID for the given index.
+    function payments(uint256 index) external view returns (bytes32);
+
+    /// @notice Returns the number of payments.
+    function paymentsLength() external view returns (uint256);
+
     /// @notice Returns the address of the receiver.
     function receiver() external view returns (address);
 
