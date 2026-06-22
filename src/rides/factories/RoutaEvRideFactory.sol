@@ -218,4 +218,6 @@ contract RoutaEvRideFactory is
             _transferERC20(asset, to, amount);
         }
     }
+
+    receive() external payable {}
 }
