@@ -18,20 +18,20 @@
 
 ## Summary
 
-| # | Finding | Severity |
-|---|---------|----------|
-| 1 | `RoutaEvRideFactory.deploy()` — driver/payer consent unbound from ride terms (`_messageHash` is caller-supplied) | 🔴 Critical |
-| 2 | `RoutaEvRide.fulfill()` / `cancel()` — static, non-domain-separated message enables cross-ride signature replay | 🔴 Critical |
-| 3 | `_actionHash` lock enables unilateral fund-lock / griefing between payer and driver | 🟠 High |
-| 4 | `emergencyCancel()` missing `status == IN_PROGRESS` guard | 🟠 High |
-| 5 | ERC-2612 `permit()` signature is front-runnable (signature griefing DoS) | 🟡 Medium |
-| 6 | No check that `payer != driver` (self-dealing) | 🟡 Medium |
-| 7 | `Escrow.deposit()` not enforced "callable once" despite NatSpec claim | 🟡 Medium |
-| 8 | Escrow has no independent accounting / invariant checks | ⚪ Low |
-| 9 | Clone implementation contract has no disabled initializer | ⚪ Low |
-| 10 | `trustedForwarder` compromise spoofs `_msgSender()` across factory & ride | ⚪ Low |
-| 11 | `feeBps` / `cancellationFeeBps` unbounded (no `<= 10000` check) | ⚪ Low |
-| 12 | `GeoCoords` lat/lng has no range validation | ⚪ Info |
+| #   | Finding                                                                                                          | Severity    |
+| --- | ---------------------------------------------------------------------------------------------------------------- | ----------- |
+| 1   | `RoutaEvRideFactory.deploy()` — driver/payer consent unbound from ride terms (`_messageHash` is caller-supplied) | 🔴 Critical |
+| 2   | `RoutaEvRide.fulfill()` / `cancel()` — static, non-domain-separated message enables cross-ride signature replay  | 🔴 Critical |
+| 3   | `_actionHash` lock enables unilateral fund-lock / griefing between payer and driver                              | 🟠 High     |
+| 4   | `emergencyCancel()` missing `status == IN_PROGRESS` guard                                                        | 🟠 High     |
+| 5   | ERC-2612 `permit()` signature is front-runnable (signature griefing DoS)                                         | 🟡 Medium   |
+| 6   | No check that `payer != driver` (self-dealing)                                                                   | 🟡 Medium   |
+| 7   | `Escrow.deposit()` not enforced "callable once" despite NatSpec claim                                            | 🟡 Medium   |
+| 8   | Escrow has no independent accounting / invariant checks                                                          | ⚪ Low      |
+| 9   | Clone implementation contract has no disabled initializer                                                        | ⚪ Low      |
+| 10  | `trustedForwarder` compromise spoofs `_msgSender()` across factory & ride                                        | ⚪ Low      |
+| 11  | `feeBps` / `cancellationFeeBps` unbounded (no `<= 10000` check)                                                  | ⚪ Low      |
+| 12  | `GeoCoords` lat/lng has no range validation                                                                      | ⚪ Info     |
 
 ---
 
@@ -51,7 +51,7 @@ address _driver = ECDSA.recover(ethSignedHash, b);
 `_messageHash` is a plain `bytes32` field on `DeploymentParams`, supplied directly by the caller. **No code path recomputes this hash from the actual deployment parameters** — `_token`, `_amountPayable`, `_feePercentageBps`, `_cancellationFeePercentageBps`, the coordinates, or `_offChainReference`. The contract simply trusts whatever hash value the caller passes and recovers two signers from it.
 
 **Impact:**
-The driver's (and, structurally, the payer's) signature proves only that the signer once signed *some* hash equal to the value supplied in this call — it proves nothing about agreement to the specific ride terms being deployed. Because `_checkPayer` only requires `_payer == msg.sender`, an attacker acting as payer can:
+The driver's (and, structurally, the payer's) signature proves only that the signer once signed _some_ hash equal to the value supplied in this call — it proves nothing about agreement to the specific ride terms being deployed. Because `_checkPayer` only requires `_payer == msg.sender`, an attacker acting as payer can:
 
 1. Obtain (or reuse) a driver's signature `b` over some hash `H` that the driver signed for a legitimate, unrelated purpose.
 2. Submit `_messageHash = H` together with **arbitrary** `_params` — different token, inflated `_amountPayable`, maximal `_cancellationFeePercentageBps`, fabricated route — and a fresh `_offChainReference`.
@@ -98,6 +98,7 @@ address signer      = ECDSA.recover(signedHash, signature);
 ```
 
 This hash is **identical across every ride clone ever deployed by the factory.** It contains:
+
 - no `address(this)` / contract identity,
 - no chain ID,
 - no ride or escrow identifier,
@@ -107,7 +108,7 @@ This hash is **identical across every ride clone ever deployed by the factory.**
 A payer's or driver's signature over `"RoutaEv:fulfill"` (or `"RoutaEv:cancel"`) is valid **forever, on every ride** where that address happens to be set as `payer` or `driver`. These signatures are not confidential:
 
 - They are passed as a plaintext calldata argument (visible in the public mempool and permanently in tx history).
-- They are also stored in `_fulfillmentSignatures` — declared `private`, but Solidity's `private` only restricts *Solidity-level* access; the raw storage slot is trivially readable on-chain via `eth_getStorageAt`.
+- They are also stored in `_fulfillmentSignatures` — declared `private`, but Solidity's `private` only restricts _Solidity-level_ access; the raw storage slot is trivially readable on-chain via `eth_getStorageAt`.
 
 **Impact:**
 Anyone who captures one `fulfill` or `cancel` signature from a user can replay it against **any other ride** that user is a party to — with completely different amounts, fee splits, and penalty calculations than the ride they actually signed for. This allows forced premature payout release or forced cancellation without the signer's consent for that specific ride.
@@ -163,6 +164,7 @@ function emergencyCancel(uint256 _payerAmount, uint256 _driverAmount) external {
 Unlike `fulfill()` and `cancel()`, this function does not check `status == Status.IN_PROGRESS`. The team can invoke it on a ride that is already `COMPLETED` or `CANCELLED`, overwriting `status` and emitting a misleading `StatusChanged` event. Actual fund transfers would likely revert (escrow already drained), but the missing invariant removes a safety net and can corrupt on-chain/off-chain state consistency in edge cases (e.g., dust remaining in escrow).
 
 **Remediation:**
+
 ```solidity
 if (status != Status.IN_PROGRESS) revert NotAllowed();
 ```
@@ -183,6 +185,7 @@ IERC20Permit(_params._token).permit(_payer, address(this), _params._amountPayabl
 The `(v, r, s)` permit signature is visible in calldata before the transaction is mined. Anyone observing the pending transaction can extract it and call `permit()` on the token directly, consuming the payer's nonce. The factory's subsequent internal `permit()` call then reverts, causing the entire `deploy()` transaction to fail — a cheap, repeatable denial-of-service against ride creation.
 
 **Remediation:** Check existing allowance first and treat `permit()` as best-effort:
+
 ```solidity
 if (IERC20(token).allowance(_payer, address(this)) < amount) {
     try IERC20Permit(token).permit(_payer, address(this), amount, deadline, v, r, s) {} catch {}
@@ -199,6 +202,7 @@ if (IERC20(token).allowance(_payer, address(this)) < amount) revert Insufficient
 Nothing prevents `_payer == _driver`. Combined with any future incentive, rebate, or points program, this is a self-dealing / wash-trading vector.
 
 **Remediation:**
+
 ```solidity
 if (_payer == _driver) revert SelfRideNotAllowed();
 ```
@@ -209,9 +213,10 @@ if (_payer == _driver) revert SelfRideNotAllowed();
 
 **Location:** `RoutaEvRideEscrow.sol::deposit()`
 
-The interface NatSpec states deposit *"Can be called by anyone, and just once"* — but this is not enforced on-chain. It is currently safe only because the factory's `approve()` + `deposit()` sequence happens to execute exactly once per ride. There is no state flag preventing a second call.
+The interface NatSpec states deposit _"Can be called by anyone, and just once"_ — but this is not enforced on-chain. It is currently safe only because the factory's `approve()` + `deposit()` sequence happens to execute exactly once per ride. There is no state flag preventing a second call.
 
 **Remediation:**
+
 ```solidity
 bool private _deposited;
 
@@ -247,6 +252,7 @@ A malicious or compromised `trustedForwarder` can spoof `_msgSender()` in `_chec
 `initialize()` does not check that `_feeBps` or `_cancellationFeeBps` are `<= 10000` (100%). Out-of-range values cause checked-arithmetic underflow reverts downstream in `cancel()` (denial of service on that ride), but no fund loss.
 
 **Remediation:**
+
 ```solidity
 if (_feeBps > BASE_BPS || _cancellationFeeBps > BASE_BPS) revert InvalidFeeBps();
 ```
