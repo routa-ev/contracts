@@ -1,1 +1,203 @@
-{"abi":[{"type":"function","name":"FEE","inputs":[],"outputs":[{"name":"","type":"uint24","internalType":"uint24"}],"stateMutability":"view"},{"type":"function","name":"allPaymentChannels","inputs":[{"name":"index","type":"uint256","internalType":"uint256"}],"outputs":[{"name":"","type":"address","internalType":"address"}],"stateMutability":"view"},{"type":"function","name":"allPaymentChannelsLength","inputs":[],"outputs":[{"name":"","type":"uint256","internalType":"uint256"}],"stateMutability":"view"},{"type":"function","name":"deploy","inputs":[{"name":"_params","type":"tuple","internalType":"struct IRoutaPaymentFactory.DeploymentParams","components":[{"name":"_receiver","type":"address","internalType":"address"},{"name":"_tokens","type":"address[]","internalType":"address[]"},{"name":"_offChainSlug","type":"string","internalType":"string"}]}],"outputs":[{"name":"","type":"address","internalType":"address"}],"stateMutability":"nonpayable"},{"type":"function","name":"offChainSlugToPaymentChannel","inputs":[{"name":"_offChainSlug","type":"string","internalType":"string"}],"outputs":[{"name":"","type":"address","internalType":"address"}],"stateMutability":"view"},{"type":"event","name":"PaymentChannelDeployed","inputs":[{"name":"channel","type":"address","indexed":true,"internalType":"address"},{"name":"receiver","type":"address","indexed":true,"internalType":"address"},{"name":"tokens","type":"address[]","indexed":false,"internalType":"address[]"},{"name":"offChainSlug","type":"string","indexed":false,"internalType":"string"}],"anonymous":false},{"type":"event","name":"SetFee","inputs":[{"name":"newFee","type":"uint24","indexed":false,"internalType":"uint24"},{"name":"oldFee","type":"uint24","indexed":false,"internalType":"uint24"}],"anonymous":false},{"type":"error","name":"FeeTooHigh","inputs":[{"name":"fee","type":"uint24","internalType":"uint24"}]}],"bytecode":{"object":"0x","sourceMap":"","linkReferences":{}},"deployedBytecode":{"object":"0x","sourceMap":"","linkReferences":{}},"methodIdentifiers":{"FEE()":"c57981b5","allPaymentChannels(uint256)":"3a82d444","allPaymentChannelsLength()":"a9333142","deploy((address,address[],string))":"7b05e514","offChainSlugToPaymentChannel(string)":"199a26a6"},"rawMetadata":"{\"compiler\":{\"version\":\"0.8.28+commit.7893614a\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"fee\",\"type\":\"uint24\"}],\"name\":\"FeeTooHigh\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"channel\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"receiver\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address[]\",\"name\":\"tokens\",\"type\":\"address[]\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"offChainSlug\",\"type\":\"string\"}],\"name\":\"PaymentChannelDeployed\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint24\",\"name\":\"newFee\",\"type\":\"uint24\"},{\"indexed\":false,\"internalType\":\"uint24\",\"name\":\"oldFee\",\"type\":\"uint24\"}],\"name\":\"SetFee\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"FEE\",\"outputs\":[{\"internalType\":\"uint24\",\"name\":\"\",\"type\":\"uint24\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"index\",\"type\":\"uint256\"}],\"name\":\"allPaymentChannels\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"allPaymentChannelsLength\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"_receiver\",\"type\":\"address\"},{\"internalType\":\"address[]\",\"name\":\"_tokens\",\"type\":\"address[]\"},{\"internalType\":\"string\",\"name\":\"_offChainSlug\",\"type\":\"string\"}],\"internalType\":\"struct IRoutaPaymentFactory.DeploymentParams\",\"name\":\"_params\",\"type\":\"tuple\"}],\"name\":\"deploy\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"_offChainSlug\",\"type\":\"string\"}],\"name\":\"offChainSlugToPaymentChannel\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{\"FEE()\":{\"notice\":\"Returns the ecosystem fee for payment channels.\"},\"allPaymentChannels(uint256)\":{\"notice\":\"Returns the address of the payment channel at the given index.\"},\"allPaymentChannelsLength()\":{\"notice\":\"Returns the total number of payment channels deployed.\"},\"deploy((address,address[],string))\":{\"notice\":\"Deploys a new payment channel using the provided parameters.\"},\"offChainSlugToPaymentChannel(string)\":{\"notice\":\"Returns the payment channel address associated with the given off-chain slug.\"}},\"version\":1}},\"settings\":{\"compilationTarget\":{\"src/payments/interfaces/IRoutaPaymentFactory.sol\":\"IRoutaPaymentFactory\"},\"evmVersion\":\"prague\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[\":@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/\",\":erc4626-tests/=lib/openzeppelin-contracts/lib/erc4626-tests/\",\":forge-std/=lib/forge-std/src/\",\":halmos-cheatcodes/=lib/openzeppelin-contracts/lib/halmos-cheatcodes/src/\",\":openzeppelin-contracts/=lib/openzeppelin-contracts/\"],\"viaIR\":true},\"sources\":{\"src/payments/interfaces/IRoutaPaymentFactory.sol\":{\"keccak256\":\"0x9fdccfc5123ec0ac7de8d86e428e020d602be6c9e45629a41620aeb305fe740a\",\"urls\":[\"bzz-raw://d27f93c7e7fc8df1bef1cbf6802a9c2e4771d01616cacb98757b1a8ce5a85189\",\"dweb:/ipfs/Qma12rw47o5PUfHZ1Z67q3yCwQNPog1BhfqoW1NVvTptux\"]}},\"version\":1}","metadata":{"compiler":{"version":"0.8.28+commit.7893614a"},"language":"Solidity","output":{"abi":[{"inputs":[{"internalType":"uint24","name":"fee","type":"uint24"}],"type":"error","name":"FeeTooHigh"},{"inputs":[{"internalType":"address","name":"channel","type":"address","indexed":true},{"internalType":"address","name":"receiver","type":"address","indexed":true},{"internalType":"address[]","name":"tokens","type":"address[]","indexed":false},{"internalType":"string","name":"offChainSlug","type":"string","indexed":false}],"type":"event","name":"PaymentChannelDeployed","anonymous":false},{"inputs":[{"internalType":"uint24","name":"newFee","type":"uint24","indexed":false},{"internalType":"uint24","name":"oldFee","type":"uint24","indexed":false}],"type":"event","name":"SetFee","anonymous":false},{"inputs":[],"stateMutability":"view","type":"function","name":"FEE","outputs":[{"internalType":"uint24","name":"","type":"uint24"}]},{"inputs":[{"internalType":"uint256","name":"index","type":"uint256"}],"stateMutability":"view","type":"function","name":"allPaymentChannels","outputs":[{"internalType":"address","name":"","type":"address"}]},{"inputs":[],"stateMutability":"view","type":"function","name":"allPaymentChannelsLength","outputs":[{"internalType":"uint256","name":"","type":"uint256"}]},{"inputs":[{"internalType":"struct IRoutaPaymentFactory.DeploymentParams","name":"_params","type":"tuple","components":[{"internalType":"address","name":"_receiver","type":"address"},{"internalType":"address[]","name":"_tokens","type":"address[]"},{"internalType":"string","name":"_offChainSlug","type":"string"}]}],"stateMutability":"nonpayable","type":"function","name":"deploy","outputs":[{"internalType":"address","name":"","type":"address"}]},{"inputs":[{"internalType":"string","name":"_offChainSlug","type":"string"}],"stateMutability":"view","type":"function","name":"offChainSlugToPaymentChannel","outputs":[{"internalType":"address","name":"","type":"address"}]}],"devdoc":{"kind":"dev","methods":{},"version":1},"userdoc":{"kind":"user","methods":{"FEE()":{"notice":"Returns the ecosystem fee for payment channels."},"allPaymentChannels(uint256)":{"notice":"Returns the address of the payment channel at the given index."},"allPaymentChannelsLength()":{"notice":"Returns the total number of payment channels deployed."},"deploy((address,address[],string))":{"notice":"Deploys a new payment channel using the provided parameters."},"offChainSlugToPaymentChannel(string)":{"notice":"Returns the payment channel address associated with the given off-chain slug."}},"version":1}},"settings":{"remappings":["@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/","erc4626-tests/=lib/openzeppelin-contracts/lib/erc4626-tests/","forge-std/=lib/forge-std/src/","halmos-cheatcodes/=lib/openzeppelin-contracts/lib/halmos-cheatcodes/src/","openzeppelin-contracts/=lib/openzeppelin-contracts/"],"optimizer":{"enabled":true,"runs":200},"metadata":{"bytecodeHash":"ipfs"},"compilationTarget":{"src/payments/interfaces/IRoutaPaymentFactory.sol":"IRoutaPaymentFactory"},"evmVersion":"prague","libraries":{},"viaIR":true},"sources":{"src/payments/interfaces/IRoutaPaymentFactory.sol":{"keccak256":"0x9fdccfc5123ec0ac7de8d86e428e020d602be6c9e45629a41620aeb305fe740a","urls":["bzz-raw://d27f93c7e7fc8df1bef1cbf6802a9c2e4771d01616cacb98757b1a8ce5a85189","dweb:/ipfs/Qma12rw47o5PUfHZ1Z67q3yCwQNPog1BhfqoW1NVvTptux"],"license":null}},"version":1},"id":63}
+{
+  "abi": [
+    {
+      "type": "function",
+      "name": "FEE",
+      "inputs": [],
+      "outputs": [{ "name": "", "type": "uint24", "internalType": "uint24" }],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "allPaymentChannels",
+      "inputs": [{ "name": "index", "type": "uint256", "internalType": "uint256" }],
+      "outputs": [{ "name": "", "type": "address", "internalType": "address" }],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "allPaymentChannelsLength",
+      "inputs": [],
+      "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "deploy",
+      "inputs": [
+        {
+          "name": "_params",
+          "type": "tuple",
+          "internalType": "struct IRoutaPaymentFactory.DeploymentParams",
+          "components": [
+            { "name": "_receiver", "type": "address", "internalType": "address" },
+            { "name": "_tokens", "type": "address[]", "internalType": "address[]" },
+            { "name": "_offChainSlug", "type": "string", "internalType": "string" }
+          ]
+        }
+      ],
+      "outputs": [{ "name": "", "type": "address", "internalType": "address" }],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "offChainSlugToPaymentChannel",
+      "inputs": [{ "name": "_offChainSlug", "type": "string", "internalType": "string" }],
+      "outputs": [{ "name": "", "type": "address", "internalType": "address" }],
+      "stateMutability": "view"
+    },
+    {
+      "type": "event",
+      "name": "PaymentChannelDeployed",
+      "inputs": [
+        { "name": "channel", "type": "address", "indexed": true, "internalType": "address" },
+        { "name": "receiver", "type": "address", "indexed": true, "internalType": "address" },
+        { "name": "tokens", "type": "address[]", "indexed": false, "internalType": "address[]" },
+        { "name": "offChainSlug", "type": "string", "indexed": false, "internalType": "string" }
+      ],
+      "anonymous": false
+    },
+    {
+      "type": "event",
+      "name": "SetFee",
+      "inputs": [
+        { "name": "newFee", "type": "uint24", "indexed": false, "internalType": "uint24" },
+        { "name": "oldFee", "type": "uint24", "indexed": false, "internalType": "uint24" }
+      ],
+      "anonymous": false
+    },
+    { "type": "error", "name": "FeeTooHigh", "inputs": [{ "name": "fee", "type": "uint24", "internalType": "uint24" }] }
+  ],
+  "bytecode": { "object": "0x", "sourceMap": "", "linkReferences": {} },
+  "deployedBytecode": { "object": "0x", "sourceMap": "", "linkReferences": {} },
+  "methodIdentifiers": {
+    "FEE()": "c57981b5",
+    "allPaymentChannels(uint256)": "3a82d444",
+    "allPaymentChannelsLength()": "a9333142",
+    "deploy((address,address[],string))": "7b05e514",
+    "offChainSlugToPaymentChannel(string)": "199a26a6"
+  },
+  "rawMetadata": "{\"compiler\":{\"version\":\"0.8.28+commit.7893614a\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"uint24\",\"name\":\"fee\",\"type\":\"uint24\"}],\"name\":\"FeeTooHigh\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"channel\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"receiver\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address[]\",\"name\":\"tokens\",\"type\":\"address[]\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"offChainSlug\",\"type\":\"string\"}],\"name\":\"PaymentChannelDeployed\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint24\",\"name\":\"newFee\",\"type\":\"uint24\"},{\"indexed\":false,\"internalType\":\"uint24\",\"name\":\"oldFee\",\"type\":\"uint24\"}],\"name\":\"SetFee\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"FEE\",\"outputs\":[{\"internalType\":\"uint24\",\"name\":\"\",\"type\":\"uint24\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"index\",\"type\":\"uint256\"}],\"name\":\"allPaymentChannels\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"allPaymentChannelsLength\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"_receiver\",\"type\":\"address\"},{\"internalType\":\"address[]\",\"name\":\"_tokens\",\"type\":\"address[]\"},{\"internalType\":\"string\",\"name\":\"_offChainSlug\",\"type\":\"string\"}],\"internalType\":\"struct IRoutaPaymentFactory.DeploymentParams\",\"name\":\"_params\",\"type\":\"tuple\"}],\"name\":\"deploy\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"_offChainSlug\",\"type\":\"string\"}],\"name\":\"offChainSlugToPaymentChannel\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{\"FEE()\":{\"notice\":\"Returns the ecosystem fee for payment channels.\"},\"allPaymentChannels(uint256)\":{\"notice\":\"Returns the address of the payment channel at the given index.\"},\"allPaymentChannelsLength()\":{\"notice\":\"Returns the total number of payment channels deployed.\"},\"deploy((address,address[],string))\":{\"notice\":\"Deploys a new payment channel using the provided parameters.\"},\"offChainSlugToPaymentChannel(string)\":{\"notice\":\"Returns the payment channel address associated with the given off-chain slug.\"}},\"version\":1}},\"settings\":{\"compilationTarget\":{\"src/payments/interfaces/IRoutaPaymentFactory.sol\":\"IRoutaPaymentFactory\"},\"evmVersion\":\"prague\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[\":@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/\",\":erc4626-tests/=lib/openzeppelin-contracts/lib/erc4626-tests/\",\":forge-std/=lib/forge-std/src/\",\":halmos-cheatcodes/=lib/openzeppelin-contracts/lib/halmos-cheatcodes/src/\",\":openzeppelin-contracts/=lib/openzeppelin-contracts/\"],\"viaIR\":true},\"sources\":{\"src/payments/interfaces/IRoutaPaymentFactory.sol\":{\"keccak256\":\"0x9fdccfc5123ec0ac7de8d86e428e020d602be6c9e45629a41620aeb305fe740a\",\"urls\":[\"bzz-raw://d27f93c7e7fc8df1bef1cbf6802a9c2e4771d01616cacb98757b1a8ce5a85189\",\"dweb:/ipfs/Qma12rw47o5PUfHZ1Z67q3yCwQNPog1BhfqoW1NVvTptux\"]}},\"version\":1}",
+  "metadata": {
+    "compiler": { "version": "0.8.28+commit.7893614a" },
+    "language": "Solidity",
+    "output": {
+      "abi": [
+        {
+          "inputs": [{ "internalType": "uint24", "name": "fee", "type": "uint24" }],
+          "type": "error",
+          "name": "FeeTooHigh"
+        },
+        {
+          "inputs": [
+            { "internalType": "address", "name": "channel", "type": "address", "indexed": true },
+            { "internalType": "address", "name": "receiver", "type": "address", "indexed": true },
+            { "internalType": "address[]", "name": "tokens", "type": "address[]", "indexed": false },
+            { "internalType": "string", "name": "offChainSlug", "type": "string", "indexed": false }
+          ],
+          "type": "event",
+          "name": "PaymentChannelDeployed",
+          "anonymous": false
+        },
+        {
+          "inputs": [
+            { "internalType": "uint24", "name": "newFee", "type": "uint24", "indexed": false },
+            { "internalType": "uint24", "name": "oldFee", "type": "uint24", "indexed": false }
+          ],
+          "type": "event",
+          "name": "SetFee",
+          "anonymous": false
+        },
+        {
+          "inputs": [],
+          "stateMutability": "view",
+          "type": "function",
+          "name": "FEE",
+          "outputs": [{ "internalType": "uint24", "name": "", "type": "uint24" }]
+        },
+        {
+          "inputs": [{ "internalType": "uint256", "name": "index", "type": "uint256" }],
+          "stateMutability": "view",
+          "type": "function",
+          "name": "allPaymentChannels",
+          "outputs": [{ "internalType": "address", "name": "", "type": "address" }]
+        },
+        {
+          "inputs": [],
+          "stateMutability": "view",
+          "type": "function",
+          "name": "allPaymentChannelsLength",
+          "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }]
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "struct IRoutaPaymentFactory.DeploymentParams",
+              "name": "_params",
+              "type": "tuple",
+              "components": [
+                { "internalType": "address", "name": "_receiver", "type": "address" },
+                { "internalType": "address[]", "name": "_tokens", "type": "address[]" },
+                { "internalType": "string", "name": "_offChainSlug", "type": "string" }
+              ]
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function",
+          "name": "deploy",
+          "outputs": [{ "internalType": "address", "name": "", "type": "address" }]
+        },
+        {
+          "inputs": [{ "internalType": "string", "name": "_offChainSlug", "type": "string" }],
+          "stateMutability": "view",
+          "type": "function",
+          "name": "offChainSlugToPaymentChannel",
+          "outputs": [{ "internalType": "address", "name": "", "type": "address" }]
+        }
+      ],
+      "devdoc": { "kind": "dev", "methods": {}, "version": 1 },
+      "userdoc": {
+        "kind": "user",
+        "methods": {
+          "FEE()": { "notice": "Returns the ecosystem fee for payment channels." },
+          "allPaymentChannels(uint256)": { "notice": "Returns the address of the payment channel at the given index." },
+          "allPaymentChannelsLength()": { "notice": "Returns the total number of payment channels deployed." },
+          "deploy((address,address[],string))": {
+            "notice": "Deploys a new payment channel using the provided parameters."
+          },
+          "offChainSlugToPaymentChannel(string)": {
+            "notice": "Returns the payment channel address associated with the given off-chain slug."
+          }
+        },
+        "version": 1
+      }
+    },
+    "settings": {
+      "remappings": [
+        "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+        "erc4626-tests/=lib/openzeppelin-contracts/lib/erc4626-tests/",
+        "forge-std/=lib/forge-std/src/",
+        "halmos-cheatcodes/=lib/openzeppelin-contracts/lib/halmos-cheatcodes/src/",
+        "openzeppelin-contracts/=lib/openzeppelin-contracts/"
+      ],
+      "optimizer": { "enabled": true, "runs": 200 },
+      "metadata": { "bytecodeHash": "ipfs" },
+      "compilationTarget": { "src/payments/interfaces/IRoutaPaymentFactory.sol": "IRoutaPaymentFactory" },
+      "evmVersion": "prague",
+      "libraries": {},
+      "viaIR": true
+    },
+    "sources": {
+      "src/payments/interfaces/IRoutaPaymentFactory.sol": {
+        "keccak256": "0x9fdccfc5123ec0ac7de8d86e428e020d602be6c9e45629a41620aeb305fe740a",
+        "urls": [
+          "bzz-raw://d27f93c7e7fc8df1bef1cbf6802a9c2e4771d01616cacb98757b1a8ce5a85189",
+          "dweb:/ipfs/Qma12rw47o5PUfHZ1Z67q3yCwQNPog1BhfqoW1NVvTptux"
+        ],
+        "license": null
+      }
+    },
+    "version": 1
+  },
+  "id": 63
+}

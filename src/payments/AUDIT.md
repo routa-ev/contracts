@@ -1,6 +1,7 @@
 # Routa Payment Channel Suite — Security Audit
 
 **Scope:**
+
 - `RoutaPaymentChannel.sol`
 - `RoutaPaymentFactory.sol`
 - `IRoutaPaymentChannel.sol`
@@ -13,20 +14,20 @@
 
 ## Summary
 
-| # | Finding | Severity |
-|---|---|---|
-| C-1 | Reentrancy in `claim`/`refundPayment`/`revokePayment`/`emergencyRelease` (transfer-before-effects) | **Critical** |
-| H-1 | Implementation contract initializable by anyone | High |
-| H-2 | `close()` doesn't gate any state-mutating function | High |
-| M-1 | Permit signature front-run/griefing | Medium |
-| M-2 | Off-chain reference squatting | Medium |
-| M-3 | Fee-on-transfer token accounting mismatch | Medium |
-| M-4 | Slug collision across different deployers | Medium |
-| L-1 | Zero-amount payments accepted | Low |
-| L-2 | No zero-address validation on `receiver`/`owner` in `initialize()` | Low |
-| L-3 | Centralized `emergencyRelease` with arbitrary receiver | Low |
-| L-4 | `getPayment()` returns silent zero defaults for unknown IDs | Low |
-| L-5 | No duplicate-token check in factory deploy params | Informational |
+| #   | Finding                                                                                            | Severity      |
+| --- | -------------------------------------------------------------------------------------------------- | ------------- |
+| C-1 | Reentrancy in `claim`/`refundPayment`/`revokePayment`/`emergencyRelease` (transfer-before-effects) | **Critical**  |
+| H-1 | Implementation contract initializable by anyone                                                    | High          |
+| H-2 | `close()` doesn't gate any state-mutating function                                                 | High          |
+| M-1 | Permit signature front-run/griefing                                                                | Medium        |
+| M-2 | Off-chain reference squatting                                                                      | Medium        |
+| M-3 | Fee-on-transfer token accounting mismatch                                                          | Medium        |
+| M-4 | Slug collision across different deployers                                                          | Medium        |
+| L-1 | Zero-amount payments accepted                                                                      | Low           |
+| L-2 | No zero-address validation on `receiver`/`owner` in `initialize()`                                 | Low           |
+| L-3 | Centralized `emergencyRelease` with arbitrary receiver                                             | Low           |
+| L-4 | `getPayment()` returns silent zero defaults for unknown IDs                                        | Low           |
+| L-5 | No duplicate-token check in factory deploy params                                                  | Informational |
 
 ---
 
@@ -48,8 +49,9 @@ payment._amount -= _amount;               // state updated AFTER
 `_transferNative` (in `BaseTransfer.sol`) uses a raw `.call{value: amount}('')`, which hands control to the recipient before any bookkeeping happens. There is no `ReentrancyGuard` anywhere in `RoutaPaymentChannel` or `BaseTransfer`.
 
 **Impact:**
-- In `claim()`, the recipient is the channel's configured `receiver`. If that address is ever a contract and becomes compromised or malicious, it can re-enter `claim()` repeatedly with the same `_paymentId` before `payment._amount` is decremented, draining the *entire pooled contract balance* for that token — not just the allocation for the one payment being claimed.
-- In `refundPayment()` and `revokePayment()`, the recipient is `payment._payer` — and **the payer is always attacker-controlled**, since anyone can be a payer. An attacker pays using a malicious contract as `_msgSender()`, then calls `revokePayment()` (no special permission required beyond being the payer of record). On receiving the native refund, the attacker's fallback function re-enters `revokePayment()` (or `refundPayment()`/`claim()`) on the *same* `_paymentId` before `_revoked`/`_amount` are set, draining the channel's entire balance for that token — including funds belonging to other payers in the same channel.
+
+- In `claim()`, the recipient is the channel's configured `receiver`. If that address is ever a contract and becomes compromised or malicious, it can re-enter `claim()` repeatedly with the same `_paymentId` before `payment._amount` is decremented, draining the _entire pooled contract balance_ for that token — not just the allocation for the one payment being claimed.
+- In `refundPayment()` and `revokePayment()`, the recipient is `payment._payer` — and **the payer is always attacker-controlled**, since anyone can be a payer. An attacker pays using a malicious contract as `_msgSender()`, then calls `revokePayment()` (no special permission required beyond being the payer of record). On receiving the native refund, the attacker's fallback function re-enters `revokePayment()` (or `refundPayment()`/`claim()`) on the _same_ `_paymentId` before `_revoked`/`_amount` are set, draining the channel's entire balance for that token — including funds belonging to other payers in the same channel.
 - `emergencyRelease()` has the identical ordering bug. The blast radius is smaller since it's gated to a trusted "team" address, but the pattern is still unsafe.
 
 **Recommendation:** Apply checks-effects-interactions consistently — mutate state (`payment._amount -= ...`, `_refunded = true`, `_revoked = true`, `_released = true`) **before** the external transfer in all four functions. Add `ReentrancyGuard`/`nonReentrant` as defense in depth, since both native transfers and `safeTransfer`/`safeTransferFrom` can hand control to recipient code (fallback functions, or `tokensReceived` hooks for ERC777-style tokens).
@@ -66,7 +68,7 @@ payment._amount -= _amount;               // state updated AFTER
 if (factory != address(0)) revert AlreadyInitialized();
 ```
 
-The constructor never sets `factory`, so the deployed *implementation* contract (the one referenced by `RoutaPaymentFactory.channelImplementation`, as opposed to its clones) sits permanently uninitialized and callable by anyone. An attacker can call `initialize()` directly on the implementation and become its "owner."
+The constructor never sets `factory`, so the deployed _implementation_ contract (the one referenced by `RoutaPaymentFactory.channelImplementation`, as opposed to its clones) sits permanently uninitialized and callable by anyone. An attacker can call `initialize()` directly on the implementation and become its "owner."
 
 This does not compromise existing or future clones — each clone has independent storage via `delegatecall` under the EIP-1167 pattern — but it is a well-known implementation-contract footgun. It enables impersonation/phishing (an attacker-"initialized" contract sitting at the known, documented implementation address) and is trivially avoidable.
 
@@ -106,7 +108,7 @@ In `payWithERC20`, the decoded `permitSignature` is necessarily visible in the m
 
 ### M-4: Slug collision across different deployers
 
-`Clones.cloneDeterministic`'s salt is `keccak256(_offChainSlug, sender, _tokens)`, so two *different* `sender` addresses can each deploy a distinct channel claiming the same `_offChainSlug`. `offChainSlugToPaymentChannel[slug]` is simply overwritten by whichever `deploy()` call lands last on-chain — there is no uniqueness enforcement on the public slug registry itself, only on the exact `(slug, sender, tokens)` tuple.
+`Clones.cloneDeterministic`'s salt is `keccak256(_offChainSlug, sender, _tokens)`, so two _different_ `sender` addresses can each deploy a distinct channel claiming the same `_offChainSlug`. `offChainSlugToPaymentChannel[slug]` is simply overwritten by whichever `deploy()` call lands last on-chain — there is no uniqueness enforcement on the public slug registry itself, only on the exact `(slug, sender, tokens)` tuple.
 
 **Impact:** Off-chain systems that resolve a channel purely by slug could be silently pointed at the wrong — or an attacker's — channel after a competing deploy.
 
@@ -120,7 +122,7 @@ In `payWithERC20`, the decoded `permitSignature` is necessarily visible in the m
 
 **L-2: No zero-address validation in `initialize()`.** A zero `_receiver` doesn't block payments coming in, but it permanently blocks `claim()` once a payment is released, since `BaseTransfer` reverts on `to == address(0)`. This silently bricks fund release for any payment that reaches the `released` state under a misconfigured channel.
 
-**L-3: Centralized `emergencyRelease` with arbitrary receiver.** `emergencyRelease` lets "team" (the factory's `owner()`) redirect a payment's full amount to an arbitrary `_receiver` parameter rather than the channel's configured `receiver`. This is presumably intentional design for emergency recovery flexibility, but it's worth stating explicitly: it's a fully centralized, single-key trust assumption spanning *every* channel deployed by the factory. Compromise of the factory owner key allows draining all active channels' unreleased payments to addresses of the attacker's choosing.
+**L-3: Centralized `emergencyRelease` with arbitrary receiver.** `emergencyRelease` lets "team" (the factory's `owner()`) redirect a payment's full amount to an arbitrary `_receiver` parameter rather than the channel's configured `receiver`. This is presumably intentional design for emergency recovery flexibility, but it's worth stating explicitly: it's a fully centralized, single-key trust assumption spanning _every_ channel deployed by the factory. Compromise of the factory owner key allows draining all active channels' unreleased payments to addresses of the attacker's choosing.
 
 **L-4: `getPayment()` returns silent zero defaults.** Querying a nonexistent `_paymentId` returns all-zero struct fields rather than reverting, which integrators could misread as "a real, zero-value payment" rather than "no such payment exists."
 
